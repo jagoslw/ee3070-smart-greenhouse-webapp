@@ -36,3 +36,27 @@
     transform: rotate(360deg);
   }
 }
+
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* 2 columns */
+  grid-template-rows: repeat(6, auto);   /* 6 rows */
+  gap: 16px;
+}
+
+.sensor-card {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 12px;
+  background-color: #f9f9f9;
+  text-align: center;
+}
+
+/* Mobile-friendly: stack into 1 column on small screens */
+@media (max-width: 600px) {
+  .grid-container {
+    grid-template-columns: 1fr; /* single column */
+    grid-template-rows: auto;
+  }
+}
+

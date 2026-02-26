@@ -16,7 +16,7 @@ function App() {
   ];
 
   return (
-    <div className="App">
+    <div className="app-container">
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <p>
@@ -31,7 +31,7 @@ function App() {
           Learn React
         </a>
       </header>
-      <h1>🌱 Smart Greenhouse Dashboard</h1>
+      <h1 ClassName="dashboard-title">🌱 Smart Greenhouse Dashboard</h1>
       <div className="grid-container">
         {sensors.map((sensor, index) => (
           <SensorCard key={index} sensorName={sensor.sensorName} value={sensor.value} />

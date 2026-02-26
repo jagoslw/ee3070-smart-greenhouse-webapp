@@ -1,5 +1,9 @@
-.App {
-  text-align: center;
+.app-container {
+  text-align: center;  
+  font-family: "JetBrains Mono","Segoe UI", Arial, sans-serif;
+  padding: 20px;
+  background: #f0f4f8;
+  min-height: 100vh;
 }
 
 .App-logo {
@@ -37,26 +41,64 @@
   }
 }
 
+
+.dashboard-title {
+  text-align: center;
+  margin-bottom: 24px;
+  color: #2c3e50;
+}
+
 .grid-container {
   display: grid;
   grid-template-columns: repeat(2, 1fr); /* 2 columns */
   grid-template-rows: repeat(6, auto);   /* 6 rows */
-  gap: 16px;
+  gap: 20px;
+  max-width: 900px;
+  margin: 0 auto;
 }
 
 .sensor-card {
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  padding: 12px;
-  background-color: #f9f9f9;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
 }
 
-/* Mobile-friendly: stack into 1 column on small screens */
+.sensor-card:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+.sensor-card h3 {
+  margin: 0;
+  font-size: 20px;
+  color: #34495e;
+}
+
+.sensor-value {
+  font-size: 24px;
+  font-weight: bold;
+  margin: 8px 0;
+  color: #2c3e50;
+}
+
+.warning {
+  color: #e74c3c;
+  font-weight: bold;
+}
+
+.ok {
+  color: #27ae60;
+  font-weight: bold;
+}
+
+/* Mobile-friendly: stack into 1 column */
 @media (max-width: 600px) {
   .grid-container {
-    grid-template-columns: 1fr; /* single column */
+    grid-template-columns: 1fr;
     grid-template-rows: auto;
   }
 }
-

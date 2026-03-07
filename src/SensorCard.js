@@ -22,6 +22,12 @@ function SensorCard({ sensorName, value }) {
       {sensorName === "Soil Moisture" && numericValue >= 30 && (
         <p style={{ color: "green" }}>✅ Soil moisture is sufficient</p>
       )}
+      {sensorName === "Humidity" && numericValue < 30 && (
+        <p style={{ color: "red" }}>🚱 Humidity is too low!</p>
+      )}
+      {sensorName === "Humidity" && numericValue >= 30 && (
+        <p style={{ color: "green" }}>💦 Humidity is sufficient</p>
+      )}
 
       {/* Temperature Warning */}
       {sensorName === "Temperature" && numericValue > 35 && (

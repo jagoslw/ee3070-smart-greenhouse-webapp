@@ -30,13 +30,22 @@ function SensorCard({ sensorName, value }) {
       )}
 
       {/* Temperature Warning */}
-      {sensorName === "Temperature" && numericValue > 35 && (
+      {sensorName === "Temperature (°C)" && numericValue > 35 && (
         <p style={{ color: "red" }}>🔥 Temperature is too high!</p>
       )}
-      {sensorName === "Temperature" && numericValue < 15 && (
+      {sensorName === "Temperature (°F)" && numericValue > 95 && (
+        <p style={{ color: "red" }}>🔥 Temperature is too high!</p>
+      )}
+      {sensorName === "Temperature (°C)" && numericValue < 15 && (
         <p style={{ color: "blue" }}>❄️ Temperature is too low!</p>
       )}
-      {sensorName === "Temperature" && numericValue >= 15 && numericValue <= 35 && (
+      {sensorName === "Temperature (°F)" && numericValue < 59 && (
+        <p style={{ color: "blue" }}>❄️ Temperature is too low!</p>
+      )}
+      {sensorName === "Temperature (°C)" && numericValue >= 15 && numericValue <= 35 && (
+        <p style={{ color: "green" }}>✅ Temperature is in the safe range</p>
+      )}
+      {sensorName === "Temperature (°F)" && numericValue >= 59 && numericValue <= 95 && (
         <p style={{ color: "green" }}>✅ Temperature is in the safe range</p>
       )}
     </div>

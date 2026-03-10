@@ -16,6 +16,9 @@ function App() {
 
   // State to hold humidity value
   const [humidity, setHumidity] = useState(null);
+  const [tempC, setTempC] = useState(null);
+  const [tempF, setTempF] = useState(null);
+  const [timestamp, setTimestamp] = useState(null);
 
   useEffect(() => {
     // Close sidebar when clicking outside
@@ -30,22 +33,40 @@ function App() {
 
   // Fetch humidity once when component mounts
   useEffect(() => {
-    async function fetchHumidity() {
-      const docRef = doc(db, "Environment", "QEZT9IRuZE9Jd6navDzg");
+    async function fetchData() {
+      const docRef = doc(db, "Environment", "DHT11");
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
         const data = docSnap.data();
-        setHumidity(data.Humidity); // only store Humidity
+  
+        setHumidity(data.Humidity);
+        setTempC(data.Temperature_C);
+        setTempF(data.Temperature_F);
+  
+        if (data.Timestamp) {
+          const date = data.Timestamp.toDate();
+          setTimestamp(date.toLocaleString("en-US", { timeZone: "Asia/Hong_Kong" }));
+        }
       }
     }
-    fetchHumidity();
+  
+    // Run once immediately
+    fetchData();
+  
+    // Run every 15 seconds
+    const interval = setInterval(fetchData, 15000);
+  
+    // Cleanup when component unmounts
+    return () => clearInterval(interval);
   }, []);
+  
 
   // Example sensor cards (only showing humidity from Firestore)
   const sensors = [
     { sensorName: "Humidity", value: humidity+" %" ?? "Loading..." },
-    { sensorName: "Soil Moisture", value: "38" },
-    { sensorName: "Temperature", value: "20" }
+    { sensorName: "Temperature (°C)", value: tempC ?? "Loading..." },
+    { sensorName: "Temperature (°F)", value: tempF ?? "Loading..." },
+    { sensorName: "Timestamp", value: timestamp ?? "Loading..." }
   ];
 
   return (

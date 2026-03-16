@@ -9,10 +9,10 @@ export const nutritionDefinitions = [
         : { label: "Nitrogen level is sufficient", tone: "good" }
     },
     {
-      key: "Phosphorous",
+      key: "Phospherous",
       label: "Phosphorous",
       unit: "mg/L",
-      format: (data) => data.Phosphorous ?? null,
+      format: (data) => data.Phospherous ?? null,
       status: (v) => v < 15
         ? { label: "Phosphorous is too low", tone: "bad" }
         : { label: "Phosphorous level is sufficient", tone: "good" }

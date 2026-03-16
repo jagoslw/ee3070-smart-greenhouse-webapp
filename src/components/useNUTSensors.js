@@ -9,13 +9,7 @@ export function useNutrition() {
     let active = true;
     const fetchData = async () => {
       try {
-        const snap = await getDoc(doc(db, "Nutrition", "NPK"));
-        if (!snap.exists()) {
-          console.log("Document does not exist!");
-        } else {
-          console.log("Nutrition data:", snap.data());
-        }
-        
+        const snap = await getDoc(doc(db, "Nutrition", "NPK"));        
         if (!active || !snap.exists()) return;
         setData(snap.data());
 

@@ -177,3 +177,12 @@
     padding: 16px;
   }
 }
+.sensor-value {
+  transition: color 1s ease, text-shadow 1s ease;
+}
+
+.glow-green {
+  color: #2ecc71; /* bright green */
+  text-shadow: 0 0 15px #2ecc71;
+}
+

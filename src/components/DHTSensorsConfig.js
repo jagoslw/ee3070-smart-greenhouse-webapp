@@ -21,23 +21,6 @@ export const sensorDefinitions = [
     }
   },
   {
-    key: "Light",
-    label: "Light",
-    unit: "lm",
-    format: (data) => data.Light ?? null,
-    status: () => ({ label: "OK", tone: "neutral" }) // add thresholds later if needed
-  },
-  {
-    key: "Timestamp",
-    label: "Timestamp",
-    unit: "",
-    format: (data) =>
-      data.Timestamp && typeof data.Timestamp.toDate === "function"
-        ? data.Timestamp.toDate().toLocaleString("en-US", { timeZone: "Asia/Hong_Kong" })
-        : null,
-    status: () => ({ label: "OK", tone: "neutral" })
-  },
-  {
     key: "Temperature_C",
     label: "Temperature (°C)",
     unit: "°C",
@@ -58,5 +41,22 @@ export const sensorDefinitions = [
       if (v > 95) return { label: "Temperature is too high", tone: "bad" };
       return { label: "Temperature is in the safe range", tone: "good" };
     }
+  },
+  {
+    key: "Light",
+    label: "Light",
+    unit: "lm",
+    format: (data) => data.Light ?? null,
+    status: () => ({ label: "OK", tone: "neutral" }) // add thresholds later if needed
+  },
+  {
+    key: "Timestamp",
+    label: "Timestamp",
+    unit: "",
+    format: (data) =>
+      data.Timestamp && typeof data.Timestamp.toDate === "function"
+        ? data.Timestamp.toDate().toLocaleString("en-US", { timeZone: "Asia/Hong_Kong" })
+        : null,
+    status: () => ({ label: "OK", tone: "neutral" })
   },
 ];

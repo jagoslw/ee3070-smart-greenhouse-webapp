@@ -13,6 +13,7 @@ import {
   Tooltip,
   Legend
 } from "chart.js";
+import { data } from "react-router-dom";
 
 ChartJS.register(LineElement, CategoryScale, LinearScale, PointElement, Title, Tooltip, Legend);
 
@@ -34,16 +35,30 @@ function Reports(){
     }, []);
         const chartData = {
             labels: readings.map(r =>
-            r.Timestamp?.toDate().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })
+            r.Timestamp?.toDate().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit",second: "2-digit" })
             ),
             datasets: [
-            {
-                label: "Sensor Value",
-                data: readings.map(r => r.Humidity), // adjust field name to match your Firestore
-                borderColor: "rgba(75,192,192,1)",
-                backgroundColor: "rgba(75,192,192,0.2)",
-                tension: 0.3
-            }
+                {
+                    label: "Humidity (%)",
+                    data: readings.map(r => r.Humidity), // adjust field name to match your Firestore
+                    borderColor: "rgba(75,192,192,1)",
+                    backgroundColor: "rgba(75,192,192,0.2)",
+                    tension: 0.4
+                },
+                {
+                    label: "Temperature (°C)",
+                    data: readings.map(r => r.Temperature_C), // adjust field name to match your Firestore
+                    borderColor: "rgb(238, 228, 38)",
+                    backgroundColor: "rgba(75,192,192,0.2)",
+                    tension: 0.4
+                },
+                {
+                    label: "Temperature (°F)",
+                    data: readings.map(r => r.Temperature_F), // adjust field name to match your Firestore
+                    borderColor: "rgb(238, 198, 38)",
+                    backgroundColor: "rgba(75,192,192,0.2)",
+                    tension: 0.4
+                }
             ]
         };const options = {
             responsive: true,
@@ -64,7 +79,7 @@ function Reports(){
               <ul>
                 {readings.map((r, i) => (
                   <li key={i}>
-                    {r.Timestamp?.toDate().toLocaleString()} — Value: {r.Value}
+                    {r.Timestamp?.toDate().toLocaleString()} — Value: {r.Humidity}
                   </li>
                 ))}
               </ul>

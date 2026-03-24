@@ -4,14 +4,14 @@ Where a web app for smart greenhouse is designed
 
 ## Main Components
 
-ESP32           --> Data Collection
-Firebase        --> Data Storage
-Offsite AI      --> Data Computation --> Instructions and state changes...
-Web App (This)  --> Data display and control
+`ESP32          `--> `Data Collection           `     
+`Firebase       `--> `Data Storage              `    
+`Offsite AI     `--> `Data Computation          ` --> `Instructions and state changes...`  
+`Web App (This) `--> `Data display and control  `
 
 ### Tools
 
-Build entirely based on React App Template
+Build entirely based on React App Template  
 First time project by @jagoslw
 
 ## Main Contributor
@@ -24,7 +24,7 @@ This is my first project posted on GitHub, functionally a jump start for learnin
 AI (copilot) is used for understanding React from the ground up.
 
 # ~~Getting Started with Create React App~~
-(React default README.md)
+(React default README.md)   
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts

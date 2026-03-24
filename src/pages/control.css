@@ -1,0 +1,80 @@
+.control-container {
+    min-height: 100vh;
+    padding: 40px 20px;
+    font-family: "JetBrains Mono";
+    text-align: center;
+  }
+  
+  .control-title {
+    font-size: 36px;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 12px;
+  }
+  
+  .control-subtitle {
+    font-size: 18px;
+    color: #7f8c8d;
+    margin-bottom: 40px;
+  }
+  
+  .control-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 24px;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+  
+  .control-card {
+    border-radius: 12px;
+    padding: 24px;
+    text-decoration: none;
+    color: #2c3e50;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.3s ease;
+    cursor: pointer;
+  }
+  
+  /* Default hover effect */
+  .control-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
+  }
+  
+  /* ON state */
+  .control-card.on {
+    background-color: #d4edda; /* light green */
+  }
+  
+  /* OFF state */
+  .control-card.off {
+    background-color: #f8d7da; /* light red */
+  }
+  .control-card.motor-0 {
+    background-color: #f8d7da; /* red */
+  }
+  
+  .control-card.motor-90 {
+    background-color: #fff3cd; /* yellow */
+  }
+  
+  .control-card.motor-180 {
+    background-color: #d4edda; /* green */
+  }
+  
+  .motor-button {
+    font-size: 24px;
+    padding: 10px 20px;
+    margin: 0 5px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: #8dc4ff;
+    color: white;
+    transition: background-color 0.3s;
+  }
+  
+  .motor-button:hover {
+    background-color: #68abf1;
+  }

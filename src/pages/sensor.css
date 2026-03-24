@@ -1,0 +1,76 @@
+/* Sensor page styles */
+
+.sensor-legend {
+  flex: auto;
+  text-align: center;
+  font-size: 36px;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 12px;
+}
+
+.sensor-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  max-width: 1200px;
+  margin: 24px auto;
+}
+
+.sensor-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.sensor-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+.sensor-title {
+  font-size: 18px;
+  color: #34495e;
+  margin-bottom: 8px;
+}
+
+.sensor-value {
+  font-size: 24px;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 8px;
+  transition: color 1s ease, text-shadow 1s ease;
+}
+
+.glow-green {
+  color: #2ecc71; /* bright green */
+  text-shadow: 0 0 15px #2ecc71;
+}
+
+/* Status text */
+.sensor-status {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.status-good {
+  color: #27ae60;
+}
+
+.status-bad {
+  color: #e74c3c;
+}
+
+.status-neutral {
+  color: #7f8c8d;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .sensor-grid {
+    grid-template-columns: 1fr;
+  }
+}

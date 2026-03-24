@@ -5,6 +5,7 @@ import { HashRouter as Router, Route, Routes, Link } from "react-router-dom";
 import Sensors from "./pages/sensors";
 import Reports from "./pages/reports";
 import AboutUs from "./pages/aboutus";
+import Control from "./pages/control";
 import Home from "./pages/home";
 
 import "./App.css";
@@ -47,8 +48,12 @@ function App() {
           <nav className="nav">
             <Link to="/" onClick={() => setSidebarOpen(false)}>Dashboard</Link>
             <Link to="/sensors" onClick={() => setSidebarOpen(false)}>Sensors</Link>
+            <Link to="/control" onClick={() => setSidebarOpen(false)}>Control</Link>
             <Link to="/reports" onClick={() => setSidebarOpen(false)}>Reports</Link>
             <Link to="/aboutus" onClick={() => setSidebarOpen(false)}>About Us</Link>
+            <Link to="https://jagoslw.github.io" rel="noopener noreferrer" onClick={() => setSidebarOpen(false)}>
+              jagoslw.github.io
+            </Link>
           </nav>
         </aside>
 
@@ -56,6 +61,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/sensors" element={<Sensors />} />
+            <Route path="/control" element={<Control />} />
             <Route path="/reports" element={<Reports />} />
             <Route path="/aboutus" element={<AboutUs />} />
           </Routes>

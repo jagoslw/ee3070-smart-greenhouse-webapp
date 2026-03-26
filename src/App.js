@@ -1,5 +1,5 @@
 // App.js
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { HashRouter as Router, Route, Routes, Link } from "react-router-dom";
 
 import Sensors from "./pages/sensors";
@@ -15,6 +15,25 @@ import menu from "./menu.png";
 function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const sidebarRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
+        setSidebarOpen(false);
+      }
+    }
+
+    if (sidebarOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+
+    // Cleanup
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [sidebarOpen]);
 
   return (
     <Router>
@@ -51,9 +70,9 @@ function App() {
             <Link to="/control" onClick={() => setSidebarOpen(false)}>Control</Link>
             <Link to="/reports" onClick={() => setSidebarOpen(false)}>Reports</Link>
             <Link to="/aboutus" onClick={() => setSidebarOpen(false)}>About Us</Link>
-            <Link to="https://jagoslw.github.io" rel="noopener noreferrer" onClick={() => setSidebarOpen(false)}>
+            <a href="https://jagoslw.github.io"  onClick={() => setSidebarOpen(false)}>
               jagoslw.github.io
-            </Link>
+            </a>
           </nav>
         </aside>
 

@@ -23,7 +23,7 @@ export const sensorDefinitions = [
   {
     key: "Light",
     label: "Light",
-    unit: "lm",
+    unit: "%",
     format: (data) => data.Light ?? null,
     status: () => ({ label: "OK", tone: "neutral" }) // add thresholds later if needed
   },{

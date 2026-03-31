@@ -1,6 +1,7 @@
 // src/firebase.js
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
+import { getDatabase } from "firebase/database";
 
 // Your Firebase config snippet from the console
 const firebaseConfig = {
@@ -10,6 +11,7 @@ const firebaseConfig = {
   storageBucket: "smartharvesting-f53ac.firebasestorage.app",
   messagingSenderId: "831843197273",
   appId: "1:831843197273:web:6d39c549dd2bd2d9852c48",
+  databaseURL: "https://smartharvesting-f53ac-default-rtdb.asia-southeast1.firebasedatabase.app",
   measurementId: "G-FHVCTZCSQR"
 };
 
@@ -18,3 +20,4 @@ const app = initializeApp(firebaseConfig);
 
 // Initialize Firestore
 export const db = getFirestore(app);
+export const rtdb = getDatabase(app);

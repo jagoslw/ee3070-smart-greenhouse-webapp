@@ -7,7 +7,8 @@ function Home() {
     { title: "Sensors", description: "View live sensor data", path: "/sensors" },
     { title: "Control", description: "Control the greenhouse environment", path: "/control" },
     { title: "Reports", description: "Check performance reports", path: "/reports" },
-    { title: "About Us", description: "Learn more about our project", path: "/aboutus" }
+    { title: "About Us", description: "Learn more about our project", path: "/aboutus" },
+    { title: "Camera", description: "View live camera feed", path: "/camera" },
   ];
 
   return (

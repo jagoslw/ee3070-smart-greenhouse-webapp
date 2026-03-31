@@ -15,7 +15,7 @@ export function useSensors() {
       } catch (_) {}
     };
     fetchData();
-    const interval = setInterval(fetchData, 15000);
+    const interval = setInterval(fetchData, 1000);
     return () => {
       active = false;
       clearInterval(interval);

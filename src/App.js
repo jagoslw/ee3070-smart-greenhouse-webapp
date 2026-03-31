@@ -6,6 +6,7 @@ import Sensors from "./pages/sensors";
 import Reports from "./pages/reports";
 import AboutUs from "./pages/aboutus";
 import Control from "./pages/control";
+import Camera from "./pages/camera";
 import Home from "./pages/home";
 
 import "./App.css";
@@ -70,6 +71,7 @@ function App() {
             <Link to="/control" onClick={() => setSidebarOpen(false)}>Control</Link>
             <Link to="/reports" onClick={() => setSidebarOpen(false)}>Reports</Link>
             <Link to="/aboutus" onClick={() => setSidebarOpen(false)}>About Us</Link>
+            <Link to="/camera" onClick={() => setSidebarOpen(false)}>Camera</Link>
             <a href="https://jagoslw.github.io"  onClick={() => setSidebarOpen(false)}>
               jagoslw.github.io
             </a>
@@ -83,6 +85,7 @@ function App() {
             <Route path="/control" element={<Control />} />
             <Route path="/reports" element={<Reports />} />
             <Route path="/aboutus" element={<AboutUs />} />
+            <Route path="/camera" element={<Camera />} />
           </Routes>
         </main>
       </div>

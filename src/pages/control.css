@@ -51,30 +51,7 @@
   .control-card.off {
     background-color: #f8d7da; /* light red */
   }
-  .control-card.motor-0 {
-    background-color: #f8d7da; /* red */
-  }
-  
-  .control-card.motor-90 {
-    background-color: #fff3cd; /* yellow */
-  }
-  
-  .control-card.motor-180 {
-    background-color: #d4edda; /* green */
-  }
-  
-  .motor-button {
-    font-size: 24px;
-    padding: 10px 20px;
-    margin: 0 5px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    background-color: #8dc4ff;
-    color: white;
-    transition: background-color 0.3s;
-  }
-  
-  .motor-button:hover {
-    background-color: #68abf1;
+  .control-card.disabled {
+    transition: all 0.3s ease;
+    border: 1px dashed #666 !important;
   }

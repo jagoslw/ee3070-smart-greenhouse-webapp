@@ -1,76 +1,106 @@
-/* Sensor page styles */
+.sensor-page-container {
+  animation: fadeIn 0.8s ease-out;
+}
+
+.sensor-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
 
 .sensor-legend {
-  flex: auto;
-  text-align: center;
-  font-size: 36px;
-  font-weight: 700;
-  color: #2c3e50;
-  margin-bottom: 12px;
+  font-size: 2.5rem;
+  font-weight: 800;
+  background: linear-gradient(to right, var(--neon-green), var(--neon-blue));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-transform: uppercase;
+  margin-bottom: 5px;
 }
 
+.system-heartbeat {
+  font-family: 'JetBrains Mono';
+  font-size: 0.7rem;
+  color: #666;
+  letter-spacing: 2px;
+}
+
+/* Grid Layout */
 .sensor-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 20px;
   max-width: 1200px;
-  margin: 24px auto;
+  margin: 0 auto;
 }
 
+/* Individual Cards */
 .sensor-card {
-  background: #ffffff;
-  border-radius: 12px;
-  padding: 16px;
-  text-align: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  background: var(--glass-bg);
+  backdrop-filter: blur(15px);
+  border: 1px solid var(--glass-border);
+  border-radius: 15px;
+  padding: 25px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .sensor-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  border-color: rgba(0, 255, 136, 0.4);
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0, 255, 136, 0.1);
 }
 
 .sensor-title {
-  font-size: 18px;
-  color: #34495e;
-  margin-bottom: 8px;
+  font-size: 0.7rem;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 15px;
 }
 
 .sensor-value {
-  font-size: 24px;
-  font-weight: 600;
-  color: #2c3e50;
-  margin-bottom: 8px;
-  transition: color 1s ease, text-shadow 1s ease;
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin-bottom: 10px;
+  transition: all 0.3s ease;
 }
 
-.glow-green {
-  color: #2ecc71; /* bright green */
-  text-shadow: 0 0 15px #2ecc71;
+/* Update Pulse Effect */
+.glow-pulse {
+  color: var(--neon-green) !important;
+  text-shadow: 0 0 20px var(--neon-green);
 }
 
-/* Status text */
 .sensor-status {
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 4px;
+  text-transform: uppercase;
 }
 
-.status-good {
-  color: #27ae60;
+.status-good { color: var(--neon-green); background: rgba(0, 255, 136, 0.05); }
+.status-bad { color: #ff3b3b; background: rgba(255, 59, 59, 0.05); animation: blink 1s infinite; }
+.status-neutral { color: #888; background: rgba(255, 255, 255, 0.05); }
+
+/* Bottom Progress Bar */
+.sensor-progress-bg {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: rgba(255,255,255,0.05);
 }
 
-.status-bad {
-  color: #e74c3c;
+.sensor-progress-fill {
+  height: 100%;
+  transition: width 1s ease-in-out, background 0.5s ease;
 }
 
-.status-neutral {
-  color: #7f8c8d;
-}
-
-/* Responsive */
-@media (max-width: 600px) {
-  .sensor-grid {
-    grid-template-columns: 1fr;
-  }
-}
+@keyframes blink { 50% { opacity: 0.5; } }

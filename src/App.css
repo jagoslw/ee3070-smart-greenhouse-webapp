@@ -1,109 +1,191 @@
-/* Base layout */
+/* --- Global Styles & Variables --- */
+:root {
+  --neon-green: #00ff88;
+  --neon-blue: #60a5fa;
+  --bg-dark: #0d0d0d;
+  --glass-bg: rgba(255, 255, 255, 0.03);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --text-main: #e0e0e0;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--bg-dark);
+  color: var(--text-main);
+  /* 尊重全局 JetBrains Mono 設定 */
+  font-family: "JetBrains Mono", monospace !important;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
 
 .app {
   min-height: 100vh;
-  background: #f0f4f8;
-  font-family: "JetBrains Mono", "Segoe UI", Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  background: radial-gradient(circle at 50% 0%, #1a2c2a 0%, #0d0d0d 100%);
 }
 
+/* --- Header Branding --- */
 .app-header {
-  height: 72px;
+  height: 80px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 20px;
-  background: #282c34;
-  color: #ffffff;
+  padding: 0 40px;
+  background: rgba(13, 13, 13, 0.8);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--glass-border);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
 }
-
-.app-main {
-  padding: 24px;
-}
-
-/* Header branding */
 
 .app-brand {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 15px;
 }
 
 .brand-logo {
-  height: 44px;
+  height: 40px;
+  filter: drop-shadow(0 0 10px var(--neon-green));
+}
+
+.brand-info {
+  display: flex;
+  flex-direction: column;
 }
 
 .brand-text {
-  font-size: 18px;
-  font-weight: 600;
+  font-size: 1.2rem;
+  font-weight: 800;
+  letter-spacing: 2px;
+  background: linear-gradient(to right, var(--neon-green), var(--neon-blue));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
-/* Buttons */
-
-.icon-button,
-.close-button {
-  background: none;
-  border: none;
-  color: inherit;
-  cursor: pointer;
+.brand-subtext {
+  font-size: 0.6rem;
+  color: #666;
+  letter-spacing: 1px;
 }
 
-.icon-button img {
-  height: 28px;
-}
-
-/* Sidebar */
-
-.sidebar {
-  position: fixed;
-  top: 0;
-  left: -260px;
-  width: 220px;
-  height: 100%;
-  padding: 20px;
-  background: #2c3e50;
-  color: #ecf0f1;
-  transition: left 0.3s ease;
-  z-index: 1000;
-}
-
-.sidebar.open {
-  left: 0;
-}
-
-.nav {
+/* --- PC Navigation --- */
+.pc-nav {
   display: flex;
-  flex-direction: column;
-  margin-top: 24px;
+  gap: 25px;
 }
 
-.nav a,
-.nav button {
-  padding: 10px 12px;
-  margin-bottom: 8px;
-  text-align: left;
-  background: #34495e;
-  color: inherit;
-  border-radius: 6px;
+.pc-nav a {
+  color: #888;
   text-decoration: none;
-  border: none;
-  cursor: pointer;
-  transition: background 0.2s ease;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  position: relative;
+  padding: 5px 0;
 }
 
-.nav a:hover,
-.nav button:hover {
-  background: #1abc9c;
-  color: #ffffff;
+.pc-nav a:hover, .pc-nav a.active {
+  color: var(--neon-green);
 }
 
-.nav-secondary {
-  opacity: 0.6;
-  cursor: not-allowed;
+.pc-nav a::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--neon-green);
+  transition: width 0.3s ease;
 }
 
-/* Responsive */
-@media (max-width: 600px) {
+.pc-nav a:hover::after {
+  width: 100%;
+}
+
+/* --- Main Area --- */
+.app-main {
+  flex: 1;
+  padding: 40px;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* --- Mobile Navigation (Hidden on PC) --- */
+.mobile-nav {
+  display: none !important;
+}
+
+/* --- Responsive Layout --- */
+@media screen and (max-width: 768px) {
+  .app-header {
+    padding: 0 20px;
+    height: 70px;
+  }
+
+  .pc-nav {
+    display: none; /* 手機端隱藏 PC 導航 */
+  }
+
   .app-main {
-    padding: 16px;
+    padding: 20px;
+    padding-bottom: 100px; /* 為底部導航留空間 */
+  }
+
+  .brand-text {
+    font-size: 1rem;
+  }
+
+  /* 手機端底部導航欄 */
+  .mobile-nav {
+    display: flex !important;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 75px;
+    background: rgba(10, 10, 10, 0.9);
+    backdrop-filter: blur(25px);
+    border-top: 1px solid var(--glass-border);
+    justify-content: space-around;
+    align-items: center;
+    z-index: 9999;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: #555;
+    transition: 0.3s;
+    flex: 1;
+  }
+
+  .nav-item.active {
+    color: var(--neon-green);
+    text-shadow: 0 0 12px rgba(0, 255, 136, 0.4);
+  }
+
+  .nav-icon {
+    font-size: 1.4rem;
+    margin-bottom: 2px;
+  }
+
+  .nav-label {
+    font-size: 0.6rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
   }
 }

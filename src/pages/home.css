@@ -1,65 +1,152 @@
+/* home.css */
+
 .home-container {
-    min-height: 100vh;
-    font-family: "JetBrains Mono","Segoe UI", Arial, sans-serif;
-    padding: 40px 20px;
-    text-align: center;
+  width: 100%;
+  text-align: center;
+  /* Font is inherited globally from App.css */
+  animation: fadeIn 0.8s ease-out;
+}
+
+.home-header {
+  margin-bottom: 50px;
+}
+
+.home-title {
+  font-size: 3rem;
+  font-weight: 800;
+  letter-spacing: 2px;
+  margin-bottom: 10px;
+  background: linear-gradient(to right, var(--neon-green), var(--neon-blue));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-transform: uppercase;
+}
+
+.home-subtitle {
+  font-size: 0.9rem;
+  color: #888;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+}
+
+/* --- Card Grid --- */
+.home-grid {
+  display: grid;
+  /* Automatically fits items, making it perfectly responsive */
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 25px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* --- Glassmorphism Cards --- */
+.home-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  padding: 35px 20px;
+  text-decoration: none;
+  color: var(--text-main);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Glowing top border effect on hover */
+.home-card::before {
+  content: '';
+  position: absolute;
+  top: 0; 
+  left: 0; 
+  width: 100%; 
+  height: 3px;
+  background: var(--neon-green);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+  transform-origin: left;
+}
+
+/* Hover States */
+.home-card:hover {
+  transform: translateY(-5px);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(0, 255, 136, 0.3);
+  box-shadow: 0 10px 30px rgba(0, 255, 136, 0.1);
+}
+
+.home-card:hover::before {
+  transform: scaleX(1);
+}
+
+.card-icon {
+  font-size: 3.5rem;
+  margin-bottom: 15px;
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.1));
+  transition: transform 0.3s ease;
+}
+
+.home-card:hover .card-icon {
+  transform: scale(1.1);
+}
+
+.card-content h2 {
+  font-size: 1.5rem;
+  color: var(--neon-green);
+  margin-bottom: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.card-content p {
+  font-size: 0.85rem;
+  color: #aaa;
+  line-height: 1.5;
+  margin-bottom: 25px;
+}
+
+.card-action {
+  margin-top: auto;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #555;
+  letter-spacing: 2px;
+  transition: color 0.3s ease, letter-spacing 0.3s ease;
+}
+
+.home-card:hover .card-action {
+  color: var(--neon-green);
+  letter-spacing: 4px;
+}
+
+/* --- Animations --- */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- Responsive Layout --- */
+@media screen and (max-width: 768px) {
+  .home-header {
+    margin-bottom: 30px;
   }
-  
   .home-title {
-    font-size: 36px;
-    font-weight: 700;
-    color: #2c3e50;
-    margin-bottom: 12px;
+    font-size: 2rem;
   }
-  
   .home-subtitle {
-    font-size: 18px;
-    color: #7f8c8d;
-    margin-bottom: 40px;
+    font-size: 0.7rem;
+    letter-spacing: 3px;
   }
-  
   .home-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 24px;
-    max-width: 1000px;
-    margin: 0 auto;
+    grid-template-columns: 1fr; /* Stack cards on mobile */
+    gap: 20px;
+    padding: 0 10px;
   }
-  
   .home-card {
-    background: #ffffff;
-    border-radius: 12px;
-    padding: 24px;
-    text-decoration: none;
-    color: inherit;
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    padding: 25px 15px;
   }
-  
-  .home-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
-  }
-  
-  .home-card h2 {
-    font-size: 22px;
-    color: #34495e;
-    margin-bottom: 12px;
-  }
-  
-  .home-card p {
-    font-size: 16px;
-    color: #555;
-    line-height: 1.6;
-  }
-  
-  /* Responsive */
-  @media (max-width: 600px) {
-    .home-title {
-      font-size: 28px;
-    }
-    .home-subtitle {
-      font-size: 16px;
-    }
-  }
-  
+}

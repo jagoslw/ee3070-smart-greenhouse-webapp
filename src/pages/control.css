@@ -1,57 +1,200 @@
+:root {
+  --glass-bg: rgba(255, 255, 255, 0.05);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --neon-green: #00ff88;
+  --neon-red: #ff3b3b;
+  --neon-blue: #60a5fa;
+}
+
+/* --- 全局 Body 背景切換 (解決方塊問題) --- */
+body.global-online-bg {
+  background: radial-gradient(circle at top right, #1a2c2a, #0d0d0d) !important;
+  transition: background 0.8s ease;
+  margin: 0;
+  padding: 0;
+}
+
+body.global-offline-bg {
+  background: radial-gradient(circle at top right, #3d0a0a, #0d0d0d) !important;
+  transition: background 0.8s ease;
+  margin: 0;
+  padding: 0;
+}
+
+/* --- 容器基礎設定 --- */
 .control-container {
-    min-height: 100vh;
-    padding: 40px 20px;
-    font-family: "JetBrains Mono";
-    text-align: center;
+  min-height: 100vh;
+  padding: 40px 20px;
+  background: transparent !important; /* 讓 body 背景透出來 */
+  color: #e0e0e0;
+  font-family: "JetBrains Mono", monospace;
+}
+
+/* --- 進入動畫 --- */
+.fade-in-up {
+  animation: fadeInUp 0.8s ease-out forwards;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
   }
-  
-  .control-title {
-    font-size: 36px;
-    font-weight: 700;
-    color: #2c3e50;
-    margin-bottom: 12px;
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
-  
-  .control-subtitle {
-    font-size: 18px;
-    color: #7f8c8d;
-    margin-bottom: 40px;
+}
+
+/* --- 標題與副標題 --- */
+.control-title {
+  font-size: 2.5rem;
+  text-align: center;
+  background: linear-gradient(to right, var(--neon-green), var(--neon-blue));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 5px;
+  transition: all 0.8s ease;
+}
+
+.control-container.disconnected .control-title {
+  background: linear-gradient(to right, var(--neon-red), #ff7b7b);
+  -webkit-background-clip: text;
+}
+
+.control-subtitle {
+  text-align: center;
+  font-size: 0.8rem;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  margin-bottom: 30px;
+  opacity: 0.6;
+}
+
+/* --- 狀態列 (PC & Mobile 統一顯示) --- */
+.status-bar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--glass-border);
+  padding: 12px 30px;
+  border-radius: 50px;
+  max-width: 750px;
+  margin: 0 auto 40px auto;
+  backdrop-filter: blur(10px);
+}
+
+.status-item { display: flex; flex-direction: column; align-items: center; }
+.status-item .label { font-size: 0.6rem; color: #888; letter-spacing: 1px; }
+.status-item .value { font-size: 1.1rem; color: var(--neon-green); font-weight: 700; }
+.status-item .value.glow { text-shadow: 0 0 12px var(--neon-green); }
+.status-item .value.error { color: var(--neon-red); text-shadow: 0 0 12px var(--neon-red); }
+.status-divider { color: rgba(255,255,255,0.1); }
+
+/* --- 佈局結構 --- */
+.main-layout-wrapper {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.wide-card {
+  margin-bottom: 25px;
+  cursor: pointer;
+}
+
+.card-content-horizontal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
+  padding: 10px 0;
+}
+
+.text-group { text-align: left; }
+.text-group h2 { margin: 0; font-size: 1.4rem; letter-spacing: 1px; }
+
+.control-grid-four {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+/* --- 控制卡片樣式 --- */
+.control-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(15px);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  padding: 25px;
+  text-align: center;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.control-card.on { border-color: var(--neon-green); box-shadow: 0 0 15px rgba(0, 255, 136, 0.1); }
+.control-card.off { border-color: rgba(255,255,255,0.05); opacity: 0.8; }
+.control-card:hover { transform: translateY(-4px); background: rgba(255,255,255,0.08); }
+
+.status-badge { display: inline-block; padding: 4px 12px; border-radius: 50px; font-size: 0.7rem; margin-top: 10px; font-weight: 800; text-transform: uppercase; }
+.on .status-badge { background: rgba(0,255,136,0.15); color: var(--neon-green); }
+.off .status-badge { background: rgba(255,255,255,0.05); color: #666; }
+
+.lock-tag {
+  position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.3); padding: 3px 8px; border-radius: 6px; font-size: 0.6rem; color: #888;
+}
+
+/* --- LED 顏色選擇 --- */
+.color-selection-section {
+  background: var(--glass-bg);
+  border-radius: 25px;
+  padding: 30px;
+  margin: 50px auto 0 auto;
+  text-align: center;
+  max-width: 1100px;
+}
+
+.color-btn-wrapper { display: flex; justify-content: space-evenly; gap: 10px; margin-top: 20px; }
+.color-btn { width: 50px; height: 50px; border-radius: 50%; border: 2px solid transparent; transition: 0.3s; }
+.color-btn.selected { border: 3px solid #fff; transform: scale(1.15); }
+
+/* --- 圖示動畫 --- */
+.device-icon { font-size: 2.2rem; display: inline-block; }
+.icon-spin { animation: spin 3s linear infinite; }
+.icon-pulse { animation: pulse 2s ease-in-out infinite; }
+@keyframes spin { from { transform: rotate(0); } to { transform: rotate(360deg); } }
+@keyframes pulse { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.1); opacity: 1; } }
+
+/* --- 徹底隱藏 Ticker 與 Nav --- */
+.mobile-ticker-wrapper, .mobile-nav {
+  display: none !important;
+}
+
+/* --- 手機端適應 (Mobile) --- */
+@media screen and (max-width: 768px) {
+  .control-container { padding: 30px 15px 60px 15px; }
+
+  .status-bar {
+    gap: 10px;
+    padding: 12px 15px;
+    width: 95%;
+    margin-bottom: 25px;
   }
-  
-  .control-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 24px;
-    max-width: 1000px;
-    margin: 0 auto;
+
+  .status-item .value { font-size: 0.9rem; }
+  .status-divider { font-size: 0.8rem; opacity: 0.3; }
+
+  .control-title { font-size: 1.8rem; }
+
+  .control-grid-four {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
   }
-  
-  .control-card {
-    border-radius: 12px;
-    padding: 24px;
-    text-decoration: none;
-    color: #2c3e50;
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
-    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.3s ease;
-    cursor: pointer;
-  }
-  
-  /* Default hover effect */
-  .control-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
-  }
-  
-  /* ON state */
-  .control-card.on {
-    background-color: #d4edda; /* light green */
-  }
-  
-  /* OFF state */
-  .control-card.off {
-    background-color: #f8d7da; /* light red */
-  }
-  .control-card.disabled {
-    transition: all 0.3s ease;
-    border: 1px dashed #666 !important;
-  }
+
+  .card-content-horizontal { flex-direction: column; gap: 10px; }
+  .text-group { text-align: center; }
+  .text-group h2 { font-size: 1.1rem; }
+
+  .color-btn { width: 40px; height: 40px; }
+}

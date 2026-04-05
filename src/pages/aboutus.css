@@ -1,72 +1,136 @@
 .about-container {
-    min-height: 100vh;
-    font-family: "JetBrains Mono","Segoe UI", Arial, sans-serif;
-    padding: 40px 20px;
-  }
-  
-  .about-hero {
-    text-align: center;
-    margin-bottom: 40px;
-  }
-  
-  .about-hero h1 {
-    font-size: 36px;
-    font-weight: 700;
-    color: #2c3e50;
-    margin-bottom: 12px;
-  }
-  
-  .about-hero p {
-    font-size: 18px;
-    color: #7f8c8d;
-  }
-  
-  .about-content {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(282px, 1fr));
-    gap: 24px;
-    max-width: 1200px;
-    margin: 0 auto;
-  }
-  
-  .about-card {
-    background: #ffffff;
-    border-radius: 12px;
-    padding: 24px;
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-  }
-  
-  .about-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
-  }
-  
-  .about-card h2 {
-    font-size: 22px;
-    color: #34495e;
-    margin-bottom: 12px;
-  }
-  
-  .about-card p {
-    font-size: 16px;
-    color: #555;
-    line-height: 1.6;
-  }
-  .about-card p1 {
-    font-size: 14px;
-    color: #7f8c8d;
-    line-height: 0.5;
-    margin-bottom: 40px;    
-  }
-  
-  /* Responsive */
-  @media (max-width: 600px) {
-    .about-hero h1 {
-      font-size: 28px;
-    }
-    .about-hero p {
-      font-size: 16px;
-    }
-  }
-  
+  min-height: 100vh;
+  font-family: "JetBrains Mono", monospace;
+  padding: 60px 20px;
+  color: var(--text-main);
+}
+
+.about-hero {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.glitch-text {
+  font-size: 3rem;
+  font-weight: 800;
+  background: linear-gradient(to right, #00ff88, #60a5fa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 10px;
+}
+
+.project-code {
+  font-size: 0.9rem;
+  color: var(--neon-blue);
+  letter-spacing: 2px;
+  margin-bottom: 10px;
+}
+
+.project-desc {
+  color: #888;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* 內容卡片佈局 */
+.about-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+  max-width: 1000px;
+  margin: 0 auto 80px;
+}
+
+.about-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--glass-border);
+  border-radius: 15px;
+  padding: 30px;
+  transition: 0.3s;
+}
+
+.about-card h2 {
+  color: var(--neon-green);
+  font-size: 1.2rem;
+  margin-bottom: 15px;
+}
+
+/* 團隊成員網格 */
+.section-title {
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 40px;
+  color: #eee;
+}
+
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.member-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 25px;
+  position: relative;
+  overflow: hidden;
+}
+
+.member-card::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; width: 4px; height: 100%;
+  background: var(--neon-blue);
+}
+
+.member-card h3 {
+  font-size: 1.1rem;
+  margin-bottom: 8px;
+  color: #fff;
+}
+
+.member-role {
+  font-size: 0.75rem;
+  color: var(--neon-green);
+  display: block;
+  margin-bottom: 12px;
+  font-weight: bold;
+}
+
+.member-desc {
+  font-size: 0.8rem;
+  color: #777;
+  line-height: 1.5;
+}
+
+/* 技術標籤 */
+.tech-stack {
+  text-align: center;
+  margin-top: 80px;
+}
+
+.tech-tags {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.tech-tags span {
+  background: rgba(96, 165, 250, 0.1);
+  color: var(--neon-blue);
+  border: 1px solid rgba(96, 165, 250, 0.3);
+  padding: 6px 15px;
+  border-radius: 20px;
+  font-size: 0.7rem;
+}
+
+@media (max-width: 600px) {
+  .glitch-text { font-size: 2rem; }
+}

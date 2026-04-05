@@ -1,53 +1,77 @@
-import React, { useEffect, useState } from "react";
-// 從 firebase/database 匯入必要的函式
-import { ref, onValue } from "firebase/database"; 
-// 從你自己的設定檔匯入 db
+import React, { useEffect, useState, useRef } from "react";
+import { ref, onValue } from "firebase/database";
 import { rtdb } from "../components/firebase"; 
+import "./camera.css";
 
 const CameraView = () => {
   const [base64Image, setBase64Image] = useState("");
+  const [status, setStatus] = useState("CONNECTING"); // CONNECTING, ONLINE, OFFLINE
+  const lastUpdateRef = useRef(Date.now());
 
   useEffect(() => {
-    // 確保 rtdb 存在後再建立 ref
     if (!rtdb) return;
 
-    // 監聽路徑：camera/latest_image
     const imageRef = ref(rtdb, 'camera/latest_image');
     
+    // 監聽影像更新
     const unsubscribe = onValue(imageRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
-        // 更新圖片 State
         setBase64Image(data);
+        setStatus("ONLINE");
+        lastUpdateRef.current = Date.now(); // 每次收到圖，更新最後活躍時間
       }
-    }, (error) => {
-      console.error("Firebase Read Error: ", error);
     });
 
-    return () => unsubscribe(); 
+    // 斷線檢測計時器：每 3 秒檢查一次是否「過期」
+    const checkInterval = setInterval(() => {
+      const secondsSinceLastUpdate = (Date.now() - lastUpdateRef.current) / 1000;
+      
+      if (secondsSinceLastUpdate > 10) { // 如果超過 10 秒沒更新
+        setStatus("OFFLINE");
+      }
+    }, 3000);
+
+    return () => {
+      unsubscribe();
+      clearInterval(checkInterval);
+    };
   }, []);
 
   return (
-    <div style={{ textAlign: 'center', marginTop: '20px' }}>
-      <h2>Smart Harvesting - Live Camera</h2>
-      <div style={{ margin: '20px auto', maxWidth: '640px' }}>
-        {base64Image ? (
-          <img 
-            decoding = "async"
-            src={`data:image/jpeg;base64,${base64Image}`} 
-            alt="Live Feed" 
-            style={{ 
-              width: '100%', 
-              borderRadius: '8px', 
-              boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
-              border: '2px solid #ddd' 
-            }}
-          />
+    <div className="camera-page">
+      <div className="camera-header">
+        <h2 className="camera-title">Live Feed</h2>
+        <div className={`live-indicator status-${status.toLowerCase()}`}>
+          <span className="dot"></span>
+          {status === "ONLINE" ? "SYSTEM ONLINE" : status === "OFFLINE" ? "SYSTEM OFFLINE" : "INITIALIZING..."}
+        </div>
+      </div>
+
+      <div className="camera-viewport">
+        {/* 只有在 ONLINE 且有圖片時才顯示影像，否則顯示佔位符 */}
+        {status === "ONLINE" && base64Image ? (
+          <div className="image-container">
+            <img 
+              decoding="async"
+              src={`data:image/jpeg;base64,${base64Image}`} 
+              alt="Live Feed" 
+              className="live-img"
+            />
+          </div>
         ) : (
-          <div style={{ padding: '40px', background: '#f0f0f0', borderRadius: '8px' }}>
-            <p>正在等待 ESP32 上傳影像...</p>
+          <div className="camera-placeholder">
+            <div className={`status-icon ${status.toLowerCase()}`}></div>
+            <p>{status === "OFFLINE" ? "Connection Lost: Check ESP32 Power" : "Awaiting Uplink..."}</p>
+            {status === "OFFLINE" && <span className="retry-hint">Last seen: {new Date(lastUpdateRef.current).toLocaleTimeString()}</span>}
           </div>
         )}
+      </div>
+
+      <div className="camera-footer">
+        <div className="info-chip">Source: ESP32-CAM</div>
+        <div className="info-chip">Resolution: 640x480</div>
+        <div className="info-chip">Auto-Timeout: 10s</div>
       </div>
     </div>
   );

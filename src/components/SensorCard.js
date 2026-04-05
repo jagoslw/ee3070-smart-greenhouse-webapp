@@ -1,33 +1,48 @@
 import React, { useEffect, useState } from "react";
 
 function SensorCard({ sensorName, value, unit, statusFn }) {
-  const [glow, setGlow] = useState(false);
+  const [pulse, setPulse] = useState(false);
 
   useEffect(() => {
     if (value != null) {
-      setGlow(true);
-      const timer = setTimeout(() => setGlow(false), 1000);
+      setPulse(true);
+      const timer = setTimeout(() => setPulse(false), 600);
       return () => clearTimeout(timer);
     }
   }, [value]);
 
-  const numericValue = value != null ? Number(value) : null;
-  const { label, tone } = numericValue != null && !Number.isNaN(numericValue)
-    ? statusFn(numericValue)
-    : { label: "N/A", tone: "neutral" };
+  const numericValue = value != null ? parseFloat(value) : 0;
+  const { label, tone } = statusFn(numericValue);
+
+  // Simple logic to determine progress bar width
+  // (Assuming most sensors are 0-100%, except NPK which we cap for visual)
+  const getProgressWidth = () => {
+    if (unit === "mg/KG") return Math.min((numericValue / 300) * 100, 100); 
+    return Math.min(numericValue, 100);
+  };
 
   return (
     <div className="sensor-card">
       <h4 className="sensor-title">{sensorName}</h4>
-      <div className={`sensor-value ${glow ? "glow-green" : ""}`}>
-        {value != null ? `${value} ${unit}` : "N/A"}
+      
+      <div className={`sensor-value ${pulse ? "glow-pulse" : ""}`}>
+        {value != null ? value : "--"}
+        <span style={{ fontSize: '1rem', marginLeft: '5px', color: '#555' }}>{unit}</span>
       </div>
-      <div
-        className={`sensor-status ${
-          tone === "good" ? "status-good" : tone === "bad" ? "status-bad" : "status-neutral"
-        }`}
-      >
+
+      <div className={`sensor-status status-${tone}`}>
         {label}
+      </div>
+
+      {/* Visual Progress Bar */}
+      <div className="sensor-progress-bg">
+        <div 
+          className="sensor-progress-fill" 
+          style={{ 
+            width: `${getProgressWidth()}%`,
+            backgroundColor: tone === 'good' ? 'var(--neon-green)' : tone === 'bad' ? '#ff3b3b' : 'var(--neon-blue)'
+          }}
+        />
       </div>
     </div>
   );

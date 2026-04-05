@@ -1,25 +1,27 @@
 import { useEffect, useState } from "react";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, onSnapshot } from "firebase/firestore"; // Switched to onSnapshot for real-time
 import { db } from "./firebase";
 
 export function useSensors() {
   const [data, setData] = useState({});
 
   useEffect(() => {
-    let active = true;
-    const fetchData = async () => {
-      try {
-        const snap = await getDoc(doc(db, "Environment", "DHT11"));
-        if (!active || !snap.exists()) return;
+    // Optimization: Using onSnapshot instead of a manual setInterval
+    // This is "cheaper" on Firebase reads and updates instantly when the sensor writes
+    const docRef = doc(db, "Environment", "0000000");
+
+    const unsubscribe = onSnapshot(docRef, (snap) => {
+      if (snap.exists()) {
         setData(snap.data());
-      } catch (_) {}
-    };
-    fetchData();
-    const interval = setInterval(fetchData, 1000);
-    return () => {
-      active = false;
-      clearInterval(interval);
-    };
+      } else {
+        console.warn("Sensor document '0000000' not found.");
+      }
+    }, (error) => {
+      console.error("Firebase Sensor Error:", error);
+    });
+
+    // Cleanup listener on unmount
+    return () => unsubscribe();
   }, []);
 
   return data;

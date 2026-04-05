@@ -1,108 +1,168 @@
 import React, { useState, useEffect } from "react";
 import { db } from "../components/firebase"; 
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { doc, setDoc, onSnapshot } from "firebase/firestore";
 import "./control.css";
 
 function Control() {
   const [values, setValues] = useState({});
+  const [sensorData, setSensorData] = useState({});
+  const [isDisconnected, setIsDisconnected] = useState(false);
 
-  const switches = [
-    { id: "ManControl", label: "Manual Override (AI Off)" },
-    { id: "FanDecision", label: "Fan Control" },
-    { id: "WaterDecision", label: "Irrigation Pump" },
-    { id: "LEDDecision", label: "Grow Light" },
-    { id: "FertDecision", label: "Fertilizer Pump" },
+  const deviceSwitches = [
+    { id: "FanDecision", label: "Fan Control", prefix: "FAN" },
+    { id: "WaterDecision", label: "Irrigation Pump", prefix: "WATER" },
+    { id: "LEDDecision", label: "Grow Light", prefix: "LED" },
+    { id: "FertDecision", label: "Fertilizer Pump", prefix: "FERT" },
   ];
 
-  // 定義顏色選項
   const colorOptions = ["white", "red", "yellow", "green", "purple"];
 
+  // 核心：控制全螢幕 Body 背景顏色
   useEffect(() => {
-    const fetchValues = async () => {
-      const snapshot = await getDoc(doc(db, "Controls", "ai"));
-      if (snapshot.exists()) {
-        setValues(snapshot.data());
-      }
+    if (isDisconnected) {
+      document.body.classList.add("global-offline-bg");
+      document.body.classList.remove("global-online-bg");
+    } else {
+      document.body.classList.add("global-online-bg");
+      document.body.classList.remove("global-offline-bg");
+    }
+
+    // 當離開此頁面時，清除背景類名，避免影響其他頁面
+    return () => {
+      document.body.classList.remove("global-offline-bg");
+      document.body.classList.remove("global-online-bg");
     };
-    fetchValues();
+  }, [isDisconnected]);
+
+  useEffect(() => {
+    const unsubControls = onSnapshot(doc(db, "Controls", "ai"), (snapshot) => {
+      if (snapshot.exists()) setValues(snapshot.data());
+    });
+
+    const unsubSensors = onSnapshot(doc(db, "Environment", "0000000"), (snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.data();
+        setSensorData(data);
+
+        let timeDisconnected = false;
+        if (data.timestamp) {
+          const lastUpdateMillis = data.timestamp.seconds ? data.timestamp.seconds * 1000 : new Date(data.timestamp).getTime();
+          timeDisconnected = (Date.now() - lastUpdateMillis > 45000);
+        }
+        
+        const allZero = (data.Temperature_C === 0 && data.Humidity === 0 && data.Moisture === 0);
+        setIsDisconnected(timeDisconnected || allZero);
+      }
+    });
+
+    return () => { unsubControls(); unsubSensors(); };
   }, []);
-  
-  const handleToggle = async (id) => {
-    let newValue = values[id] === 1 ? 0 : 1;
-    await setDoc(doc(db, "Controls", "ai"), { [id]: newValue }, { merge: true });  
-    setValues((prev) => ({ ...prev, [id]: newValue }));
+
+  const handleToggle = async (id, prefix) => {
+    const currentVal = String(values[id] || "");
+    const isCurrentlyOn = currentVal.includes("_ON");
+    const newValue = isCurrentlyOn ? `${prefix}_OFF` : `${prefix}_ON`;
+    try {
+      await setDoc(doc(db, "Controls", "ai"), { [id]: newValue }, { merge: true });
+    } catch (e) { console.error("Firebase update failed", e); }
   };
 
-  // 新增：處理顏色更新的函數
   const handleColorChange = async (color) => {
-    await setDoc(doc(db, "Controls", "ai"), { color: color }, { merge: true });
-    setValues((prev) => ({ ...prev, color: color }));
+    try {
+      await setDoc(doc(db, "Controls", "ai"), { color: color.toUpperCase() }, { merge: true });
+    } catch (e) { console.error("Color change failed", e); }
   };
 
-  const isManualMode = values["ManControl"] === 1;
+  const isManualMode = String(values["ManControl"]).includes("MAN_ON");
+
+  const getDeviceIcon = (id, isOn) => {
+    switch (id) {
+      case "FanDecision": return <span className={`device-icon ${isOn ? "icon-spin" : ""}`}>🌀</span>;
+      case "WaterDecision": return <span className={`device-icon ${isOn ? "icon-pulse" : ""}`}>💧</span>;
+      case "LEDDecision": return <span className={`device-icon ${isOn ? "icon-pulse" : ""}`}>💡</span>;
+      case "FertDecision": return <span className={`device-icon ${isOn ? "icon-pulse" : ""}`}>🧪</span>;
+      case "ManControl": return <span className="device-icon">{isOn ? "🔓" : "🔒"}</span>;
+      default: return <span className="device-icon">⚙️</span>;
+    }
+  };
+
+  
 
   return (
-    <div className="control-container">
-      <h1 className="control-title">Greenhouse Control Panel</h1>
-      <p className="control-subtitle">
-        {isManualMode ? "⚠️ Manual Control Enabled" : "🤖 AI Auto-Pilot Active"}
-      </p>
+    <div className={`control-container fade-in-up ${isDisconnected ? "disconnected" : ""}`}>
+      <h1 className="control-title">Oasis Command</h1>
 
-      {/* --- 設備開關區塊 --- */}
-      <div className="control-grid">
-        {switches.map((sw, i) => {
-          const isOn = values[sw.id] === 1;
-          const canClick = sw.id === "ManControl" || isManualMode;
-          const cardClass = `control-card ${isOn ? "on" : "off"}`;
-
-          return (
-            <div
-              key={i}
-              className={cardClass}
-              style={{ 
-                cursor: canClick ? "pointer" : "not-allowed",
-                filter: canClick ? "none" : "brightness(0.8)",
-              }}
-              onClick={canClick ? () => handleToggle(sw.id) : undefined}
-            >
-              <h2>{sw.label}</h2>
-              <p>Status: {isOn ? "ON" : "OFF"}</p>
-              {!canClick && <div className="lock-tag">🔒 AI Active</div>}
-            </div>
-          );
-        })}
+      {/* 狀態列：現在手機與 PC 都顯示這個 */}
+      <div className="status-bar">
+        <div className="status-item">
+          <span className="label">TEMP</span>
+          <span className="value">{sensorData.Temperature_C ?? "--"}°C</span>
+        </div>
+        <div className="status-divider">|</div>
+        <div className="status-item">
+          <span className="label">HUMIDITY</span>
+          <span className="value">{sensorData.Humidity ?? "--"}%</span>
+        </div>
+        <div className="status-divider">|</div>
+        <div className="status-item">
+          <span className="label">MOISTURE</span>
+          <span className="value">{sensorData.Moisture ?? "--"}%</span>
+        </div>
+        <div className="status-divider">|</div>
+        <div className="status-item">
+          <span className="label">STATUS</span>
+          <span className={`value ${isDisconnected ? "error" : "glow"}`}>
+            {isDisconnected ? "OFFLINE" : "ONLINE"}
+          </span>
+        </div>
       </div>
 
-      {/* --- 新增：LED 顏色選擇區塊 --- */}
-      <div className="color-selection-section" style={{ marginTop: '30px', textAlign: 'center' }}>
-        <h3>LED Spectrum Color</h3>
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '15px', marginTop: '10px' }}>
-          {colorOptions.map((color) => {
-            const isSelected = values.color === color;
+      <p className="control-subtitle">{isManualMode ? "🔓 Manual Control Enabled" : "🔒 AI Autopilot Mode"}</p>
+
+      <div className="main-layout-wrapper">
+        <div 
+          className={`control-card wide-card ${isManualMode ? "on neon-active" : "off"}`}
+          onClick={() => handleToggle("ManControl", "MAN")}
+        >
+          <div className="card-content-horizontal">
+            {getDeviceIcon("ManControl", isManualMode)}
+            <div className="text-group">
+              <h2>Manual Override System</h2>
+              <div className="status-badge">{isManualMode ? "MANUAL" : "AI AUTO"}</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="control-grid-four">
+          {deviceSwitches.map((sw, i) => {
+            const valStr = String(values[sw.id] || "");
+            const isOn = valStr.endsWith("_ON");
             return (
-              <button
-                key={color}
-                onClick={isManualMode ? () => handleColorChange(color) : undefined}
-                style={{
-                  width: '50px',
-                  height: '50px',
-                  borderRadius: '50%',
-                  backgroundColor: color,
-                  border: isSelected ? '4px solid #fff' : '2px solid #555',
-                  boxShadow: isSelected ? `0 0 15px ${color}` : 'none',
-                  cursor: isManualMode ? 'pointer' : 'not-allowed',
-                  opacity: isManualMode || isSelected ? 1 : 0.3,
-                  transition: 'all 0.2s ease',
-                  transform: isSelected ? 'scale(1.2)' : 'scale(1)'
-                }}
-                title={color.charAt(0).toUpperCase() + color.slice(1)}
-              />
+              <div key={i} className={`control-card ${isOn ? "on neon-active" : "off"}`}
+                style={{ cursor: isManualMode ? "pointer" : "not-allowed", filter: isManualMode ? "none" : "brightness(0.7)" }}
+                onClick={isManualMode ? () => handleToggle(sw.id, sw.prefix) : undefined}>
+                {!isManualMode && <div className="lock-tag">AI ACTIVE</div>}
+                {getDeviceIcon(sw.id, isOn)}
+                <h2>{sw.label}</h2>
+                <div className="status-badge">{isOn ? "On" : "Off"}</div>
+              </div>
             );
           })}
         </div>
-        <p style={{ marginTop: '10px', fontSize: '14px', color: '#ccc' }}>
-          Current Selection: <strong>{values.color || "None"}</strong>
-        </p>
+      </div>
+
+      <div className="color-selection-section">
+        <h3>LED LIGHT SPECTRUM</h3>
+        <div className="color-btn-wrapper">
+          {colorOptions.map((color) => {
+            const isSelected = String(values.color).toUpperCase() === color.toUpperCase();
+            return (
+              <button key={color} className={`color-btn ${isSelected ? "selected" : ""}`}
+                onClick={() => handleColorChange(color)}
+                style={{ backgroundColor: color, boxShadow: isSelected ? `0 0 20px ${color}` : 'none', cursor: "pointer" }} />
+            );
+          })}
+        </div>
       </div>
     </div>
   );

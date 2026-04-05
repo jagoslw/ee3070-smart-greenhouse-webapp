@@ -1,8 +1,26 @@
+/* 定義進入動畫：與 Control 頁面一致 */
+.fade-in-up {
+  opacity: 0;
+  animation: fadeInUp 0.8s ease-out forwards;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .about-container {
   min-height: 100vh;
   font-family: "JetBrains Mono", monospace;
   padding: 60px 20px;
   color: var(--text-main);
+  background: transparent; /* 確保透出全局背景 */
 }
 
 .about-hero {
@@ -21,7 +39,7 @@
 
 .project-code {
   font-size: 0.9rem;
-  color: var(--neon-blue);
+  color: #60a5fa; /* 直接指定顏色確保一致 */
   letter-spacing: 2px;
   margin-bottom: 10px;
 }
@@ -32,7 +50,7 @@
   margin: 0 auto;
 }
 
-/* 內容卡片佈局 */
+/* 內容卡片 */
 .about-content {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -42,21 +60,27 @@
 }
 
 .about-card {
-  background: var(--glass-bg);
+  background: rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(10px);
-  border: 1px solid var(--glass-border);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 15px;
   padding: 30px;
-  transition: 0.3s;
+  transition: 0.3s ease;
+}
+
+.about-card:hover {
+  transform: translateY(-5px);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: #00ff88;
 }
 
 .about-card h2 {
-  color: var(--neon-green);
+  color: #00ff88;
   font-size: 1.2rem;
   margin-bottom: 15px;
 }
 
-/* 團隊成員網格 */
+/* 團隊成員 */
 .section-title {
   text-align: center;
   font-size: 2rem;
@@ -79,13 +103,15 @@
   padding: 25px;
   position: relative;
   overflow: hidden;
+  opacity: 0; /* 配合 animation-delay */
+  animation: fadeInUp 0.6s ease-out forwards;
 }
 
 .member-card::before {
   content: "";
   position: absolute;
   top: 0; left: 0; width: 4px; height: 100%;
-  background: var(--neon-blue);
+  background: #60a5fa;
 }
 
 .member-card h3 {
@@ -96,7 +122,7 @@
 
 .member-role {
   font-size: 0.75rem;
-  color: var(--neon-green);
+  color: #00ff88;
   display: block;
   margin-bottom: 12px;
   font-weight: bold;
@@ -124,7 +150,7 @@
 
 .tech-tags span {
   background: rgba(96, 165, 250, 0.1);
-  color: var(--neon-blue);
+  color: #60a5fa;
   border: 1px solid rgba(96, 165, 250, 0.3);
   padding: 6px 15px;
   border-radius: 20px;
@@ -133,4 +159,5 @@
 
 @media (max-width: 600px) {
   .glitch-text { font-size: 2rem; }
+  .about-container { padding-top: 40px; }
 }

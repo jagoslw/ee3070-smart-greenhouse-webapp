@@ -10,7 +10,8 @@ function About() {
   ];
 
   return (
-    <div className="about-container">
+    /* 加入了 fade-in-up 確保進入頁面有動畫 */
+    <div className="about-container fade-in-up">
       <section className="about-hero">
         <h1 className="glitch-text">About Project</h1>
         <p className="project-code">EE3070 Design Project | City University of Hong Kong</p>
@@ -32,7 +33,8 @@ function About() {
         <h1 className="section-title">Development Team</h1>
         <div className="team-grid">
           {team.map((member, index) => (
-            <div className="member-card" key={index}>
+            /* 為每個成員卡片加上不同的延遲時間 */
+            <div className="member-card" key={index} style={{ animationDelay: `${0.2 + index * 0.1}s` }}>
               <div className="member-info">
                 <h3>{member.name}</h3>
                 <span className="member-role">{member.role}</span>

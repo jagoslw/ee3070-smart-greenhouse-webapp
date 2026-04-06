@@ -7,6 +7,7 @@ import AboutUs from "./pages/aboutus";
 import Control from "./pages/control";
 import Camera from "./pages/camera";
 import Home from "./pages/home";
+import DebugPage from "./pages/debugPage"; // 新增 DebugPage 引入
 
 import "./App.css";
 import logo from "./logo.svg";
@@ -77,6 +78,7 @@ function App() {
             <Route path="/reports" element={<Reports />} />
             <Route path="/aboutus" element={<AboutUs />} />
             <Route path="/camera" element={<Camera />} />
+            <Route path="/debug" element={<DebugPage />} /> {/* 新增 DebugPage 路由 */}
           </Routes>
         </main>
 

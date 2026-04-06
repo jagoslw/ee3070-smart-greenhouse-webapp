@@ -15,8 +15,8 @@ function Home() {
   return (
     <div className="home-container">
       <div className="home-header">
-        <h1 className="home-title">SYSTEM DASHBOARD</h1>
-        <p className="home-subtitle">OASIS Core Navigation Terminal</p>
+        <h1 className="home-title">AGiVEMS DASHBOARD</h1>
+        <p className="home-subtitle">Advanced Greenhouse Intelligence and Vision-Enhanced Monitoring System</p>
       </div>
 
       <div className="home-grid">

@@ -20,7 +20,7 @@ function DHT() {
   return (
     <div className="sensor-page-container">
       <header className="sensor-header">
-        <h3 className="sensor-legend">Environmental Levels</h3>
+        <h3 className="sensor-legend">AGiVEMS Environmental Levels</h3>
         <p className="system-heartbeat">LAST SYNC: {timestamp}</p>
       </header>
 

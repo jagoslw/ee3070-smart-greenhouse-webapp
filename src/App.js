@@ -51,7 +51,7 @@ function App() {
           <div className="app-brand">
             <img src={logo} alt="Logo" className="brand-logo" />
             <div className="brand-info">
-              <span className="brand-text">GREENHOUSE</span>
+              <span className="brand-text">AGiVEMS</span>
               <span className="brand-subtext">EE3070 Smart Greenhouse</span>
             </div>
           </div>

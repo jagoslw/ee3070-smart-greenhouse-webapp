@@ -9,29 +9,18 @@ function Control() {
   const [isDisconnected, setIsDisconnected] = useState(false);
 
   const deviceSwitches = [
-    { id: "FanDecision", label: "Fan Control", prefix: "FAN" },
-    { id: "WaterDecision", label: "Irrigation Pump", prefix: "WATER" },
-    { id: "LEDDecision", label: "Grow Light", prefix: "LED" },
-    { id: "FertDecision", label: "Fertilizer Pump", prefix: "FERT" },
+    { id: "FanDecision", label: "Fan Control" },
+    { id: "WaterDecision", label: "Irrigation Pump" },
+    { id: "LEDDecision", label: "Grow Light" },
+    { id: "FertDecision", label: "Fertilizer Pump" },
   ];
 
   const colorOptions = ["white", "red", "yellow", "green", "purple"];
 
-  // 核心：控制全螢幕 Body 背景顏色
   useEffect(() => {
-    if (isDisconnected) {
-      document.body.classList.add("global-offline-bg");
-      document.body.classList.remove("global-online-bg");
-    } else {
-      document.body.classList.add("global-online-bg");
-      document.body.classList.remove("global-offline-bg");
-    }
-
-    // 當離開此頁面時，清除背景類名，避免影響其他頁面
-    return () => {
-      document.body.classList.remove("global-offline-bg");
-      document.body.classList.remove("global-online-bg");
-    };
+    const themeClass = isDisconnected ? "global-offline-bg" : "global-online-bg";
+    document.body.classList.add(themeClass);
+    return () => document.body.classList.remove("global-offline-bg", "global-online-bg");
   }, [isDisconnected]);
 
   useEffect(() => {
@@ -43,28 +32,46 @@ function Control() {
       if (snapshot.exists()) {
         const data = snapshot.data();
         setSensorData(data);
-
-        let timeDisconnected = false;
-        if (data.timestamp) {
-          const lastUpdateMillis = data.timestamp.seconds ? data.timestamp.seconds * 1000 : new Date(data.timestamp).getTime();
-          timeDisconnected = (Date.now() - lastUpdateMillis > 45000);
-        }
-        
-        const allZero = (data.Temperature_C === 0 && data.Humidity === 0 && data.Moisture === 0);
-        setIsDisconnected(timeDisconnected || allZero);
+        const lastUpdate = data.timestamp?.seconds ? data.timestamp.seconds * 1000 : new Date(data.timestamp).getTime();
+        setIsDisconnected(Date.now() - lastUpdate > 45000 || (data.Temperature_C === 0 && data.Humidity === 0));
       }
     });
 
     return () => { unsubControls(); unsubSensors(); };
   }, []);
 
-  const handleToggle = async (id, prefix) => {
+  // 修改後的開關邏輯：僅在手動模式下允許操作
+  const handleToggle = async (id) => {
     const currentVal = String(values[id] || "");
+    const isManual = currentVal.includes("MAN");
+    
+    // 如果不是手動模式，直接攔截，不允許操作開關
+    if (!isManual) return;
+
     const isCurrentlyOn = currentVal.includes("_ON");
-    const newValue = isCurrentlyOn ? `${prefix}_OFF` : `${prefix}_ON`;
+    const nextStatus = isCurrentlyOn ? "OFF" : "ON";
+    const newValue = `MAN_${nextStatus}`; // 在手動模式下切換，輸出必定是 MAN_...
+
     try {
       await setDoc(doc(db, "Controls", "ai"), { [id]: newValue }, { merge: true });
-    } catch (e) { console.error("Firebase update failed", e); }
+    } catch (e) { console.error("Toggle failed", e); }
+  };
+
+  // 修改後的模式切換：輸出簡化格式
+  const handleModeToggle = async (e, id) => {
+    e.stopPropagation(); 
+    const currentVal = String(values[id] || "");
+    const isManual = currentVal.includes("MAN");
+    const isCurrentlyOn = currentVal.includes("_ON");
+
+    // 切換模式但保留目前的開關狀態
+    const nextMode = isManual ? "AUTO" : "MAN";
+    const status = isCurrentlyOn ? "ON" : "OFF";
+    const newValue = `${nextMode}_${status}`; // 輸出：AUTO_ON, MAN_OFF 等
+
+    try {
+      await setDoc(doc(db, "Controls", "ai"), { [id]: newValue }, { merge: true });
+    } catch (e) { console.error("Mode switch failed", e); }
   };
 
   const handleColorChange = async (color) => {
@@ -73,81 +80,61 @@ function Control() {
     } catch (e) { console.error("Color change failed", e); }
   };
 
-  const isManualMode = String(values["ManControl"]).includes("MAN_ON");
-
   const getDeviceIcon = (id, isOn) => {
     switch (id) {
       case "FanDecision": return <span className={`device-icon ${isOn ? "icon-spin" : ""}`}>🌀</span>;
       case "WaterDecision": return <span className={`device-icon ${isOn ? "icon-pulse" : ""}`}>💧</span>;
       case "LEDDecision": return <span className={`device-icon ${isOn ? "icon-pulse" : ""}`}>💡</span>;
       case "FertDecision": return <span className={`device-icon ${isOn ? "icon-pulse" : ""}`}>🧪</span>;
-      case "ManControl": return <span className="device-icon">{isOn ? "🔓" : "🔒"}</span>;
       default: return <span className="device-icon">⚙️</span>;
     }
   };
 
-  
-
   return (
     <div className={`control-container fade-in-up ${isDisconnected ? "disconnected" : ""}`}>
-      <h1 className="control-title">Oasis Command</h1>
+      <h1 className="control-title">AGiVEMS Command</h1>
 
-      {/* 狀態列：現在手機與 PC 都顯示這個 */}
       <div className="status-bar">
-        <div className="status-item">
-          <span className="label">TEMP</span>
-          <span className="value">{sensorData.Temperature_C ?? "--"}°C</span>
-        </div>
+        <div className="status-item"><span className="label">TEMP</span><span className="value">{sensorData.Temperature_C ?? "--"}°C</span></div>
         <div className="status-divider">|</div>
-        <div className="status-item">
-          <span className="label">HUMIDITY</span>
-          <span className="value">{sensorData.Humidity ?? "--"}%</span>
-        </div>
+        <div className="status-item"><span className="label">HUMIDITY</span><span className="value">{sensorData.Humidity ?? "--"}%</span></div>
         <div className="status-divider">|</div>
-        <div className="status-item">
-          <span className="label">MOISTURE</span>
-          <span className="value">{sensorData.Moisture ?? "--"}%</span>
-        </div>
+        <div className="status-item"><span className="label">MOISTURE</span><span className="value">{sensorData.Moisture ?? "--"}%</span></div>
         <div className="status-divider">|</div>
-        <div className="status-item">
-          <span className="label">STATUS</span>
-          <span className={`value ${isDisconnected ? "error" : "glow"}`}>
-            {isDisconnected ? "OFFLINE" : "ONLINE"}
-          </span>
-        </div>
+        <div className="status-item"><span className="label">STATUS</span><span className={`value ${isDisconnected ? "error" : "glow"}`}>{isDisconnected ? "OFFLINE" : "ONLINE"}</span></div>
       </div>
 
-      <p className="control-subtitle">{isManualMode ? "🔓 Manual Control Enabled" : "🔒 AI Autopilot Mode"}</p>
-
       <div className="main-layout-wrapper">
-        <div 
-          className={`control-card wide-card ${isManualMode ? "on neon-active" : "off"}`}
-          onClick={() => handleToggle("ManControl", "MAN")}
-        >
-          <div className="card-content-horizontal">
-            {getDeviceIcon("ManControl", isManualMode)}
-            <div className="text-group">
-              <h2>Manual Override System</h2>
-              <div className="status-badge">{isManualMode ? "MANUAL" : "AI AUTO"}</div>
-            </div>
-          </div>
-        </div>
-
         <div className="control-grid-four">
-          {deviceSwitches.map((sw, i) => {
-            const valStr = String(values[sw.id] || "");
-            const isOn = valStr.endsWith("_ON");
-            return (
-              <div key={i} className={`control-card ${isOn ? "on neon-active" : "off"}`}
-                style={{ cursor: isManualMode ? "pointer" : "not-allowed", filter: isManualMode ? "none" : "brightness(0.7)" }}
-                onClick={isManualMode ? () => handleToggle(sw.id, sw.prefix) : undefined}>
-                {!isManualMode && <div className="lock-tag">AI ACTIVE</div>}
+        {deviceSwitches.map((sw, i) => {
+          const valStr = String(values[sw.id] || "");
+          const isOn = valStr.includes("_ON");
+          const isManual = valStr.includes("MAN");
+
+          return (
+            <div key={i} className={`control-card ${isOn ? "on" : "off"} ${!isManual ? "is-locked" : ""}`}>
+              <div className="card-main-area" onClick={() => handleToggle(sw.id)}>
+                <div className="mode-indicator">
+                  {/* 如果是 AI 模式，在文字後方加上鎖頭 */}
+                  {isManual ? "👤 MANUAL" : "🤖 AI AUTO 🔒"}
+                </div>
+                
+                {/* 這裡移除了原本的 lock-overlay div */}
+                
                 {getDeviceIcon(sw.id, isOn)}
                 <h2>{sw.label}</h2>
-                <div className="status-badge">{isOn ? "On" : "Off"}</div>
+                <div className="status-badge">{isOn ? "ACTIVE" : "IDLE"}</div>
               </div>
-            );
-          })}
+              
+              <button 
+                className={`mode-toggle-btn ${isManual ? "btn-to-auto" : "btn-to-man"}`}
+                onClick={(e) => handleModeToggle(e, sw.id)}
+              >
+                {isManual ? "RELEASE TO AI" : "TAKE MANUAL CONTROL"}
+              </button>
+            </div>
+          );
+        })}
         </div>
       </div>
 
@@ -159,7 +146,7 @@ function Control() {
             return (
               <button key={color} className={`color-btn ${isSelected ? "selected" : ""}`}
                 onClick={() => handleColorChange(color)}
-                style={{ backgroundColor: color, boxShadow: isSelected ? `0 0 20px ${color}` : 'none', cursor: "pointer" }} />
+                style={{ backgroundColor: color, boxShadow: isSelected ? `0 0 20px ${color}` : 'none' }} />
             );
           })}
         </div>

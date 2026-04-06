@@ -41,7 +41,7 @@ const CameraView = () => {
   return (
     <div className="camera-page">
       <div className="camera-header">
-        <h2 className="camera-title">Live Feed</h2>
+        <h2 className="camera-title">AGiVEMS Live Feed</h2>
         <div className={`live-indicator status-${status.toLowerCase()}`}>
           <span className="dot"></span>
           {status === "ONLINE" ? "SYSTEM ONLINE" : status === "OFFLINE" ? "SYSTEM OFFLINE" : "INITIALIZING..."}

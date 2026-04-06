@@ -80,7 +80,7 @@ function Reports() {
   return (
     <div className="reports-container">
       <div className="reports-header">
-        <h1 className="reports-title">Oasis Intelligence</h1>
+        <h1 className="reports-title">AGiVEMS Intelligence</h1>
         <p className="reports-subtitle">Analytical Insights & Trend Reports</p>
       </div>
 

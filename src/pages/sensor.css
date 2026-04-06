@@ -13,7 +13,6 @@
   background: linear-gradient(to right, var(--neon-green), var(--neon-blue));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  text-transform: uppercase;
   margin-bottom: 5px;
 }
 

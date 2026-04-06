@@ -1,16 +1,16 @@
 {
   "files": {
-    "main.css": "/ee3070-smart-greenhouse-webapp/static/css/main.ba210fbc.css",
-    "main.js": "/ee3070-smart-greenhouse-webapp/static/js/main.f7cfe348.js",
+    "main.css": "/ee3070-smart-greenhouse-webapp/static/css/main.6d78339e.css",
+    "main.js": "/ee3070-smart-greenhouse-webapp/static/js/main.6aa045b5.js",
     "static/js/453.3116cf0d.chunk.js": "/ee3070-smart-greenhouse-webapp/static/js/453.3116cf0d.chunk.js",
     "static/media/logo.svg": "/ee3070-smart-greenhouse-webapp/static/media/logo.6ce24c58023cc2f8fd88fe9d219db6c6.svg",
     "index.html": "/ee3070-smart-greenhouse-webapp/index.html",
-    "main.ba210fbc.css.map": "/ee3070-smart-greenhouse-webapp/static/css/main.ba210fbc.css.map",
-    "main.f7cfe348.js.map": "/ee3070-smart-greenhouse-webapp/static/js/main.f7cfe348.js.map",
+    "main.6d78339e.css.map": "/ee3070-smart-greenhouse-webapp/static/css/main.6d78339e.css.map",
+    "main.6aa045b5.js.map": "/ee3070-smart-greenhouse-webapp/static/js/main.6aa045b5.js.map",
     "453.3116cf0d.chunk.js.map": "/ee3070-smart-greenhouse-webapp/static/js/453.3116cf0d.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.ba210fbc.css",
-    "static/js/main.f7cfe348.js"
+    "static/css/main.6d78339e.css",
+    "static/js/main.6aa045b5.js"
   ]
 }

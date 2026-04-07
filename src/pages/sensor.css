@@ -1,44 +1,56 @@
+/* --- AGiVEMS Sensor Dashboard (Scaled 1.25x) --- */
+:root {
+  --neon-green: #00ff88;
+  --neon-red: #ff3b3b;
+  --neon-blue: #60a5fa;
+  --glass-bg: rgba(255, 255, 255, 0.05);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --text-main: #e0e0e0;
+}
+
 .sensor-page-container {
   animation: fadeIn 0.8s ease-out;
+  padding: 50px 25px; /* Scaled padding */
 }
 
 .sensor-header {
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 40px; /* Scaled from 30px */
 }
 
 .sensor-legend {
-  font-size: 2.5rem;
+  font-size: 3.125rem; /* Scaled from 2.5rem */
   font-weight: 800;
   background: linear-gradient(to right, var(--neon-green), var(--neon-blue));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  margin-bottom: 5px;
+  margin-bottom: 10px;
 }
 
 .system-heartbeat {
-  font-family: 'JetBrains Mono';
-  font-size: 0.7rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.875rem; /* Scaled from 0.7rem */
   color: #666;
-  letter-spacing: 2px;
+  letter-spacing: 2.5px;
 }
 
-/* Grid Layout */
+/* --- 3x3 Grid Layout --- */
 .sensor-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 20px;
-  max-width: 1200px;
+  /* Forces 3 columns on desktop/tablets */
+  grid-template-columns: repeat(3, 1fr); 
+  gap: 25px; /* Scaled from 20px */
+  max-width: 1500px; /* Scaled from 1200px */
   margin: 0 auto;
 }
 
 /* Individual Cards */
 .sensor-card {
   background: var(--glass-bg);
-  backdrop-filter: blur(15px);
+  backdrop-filter: blur(18px);
   border: 1px solid var(--glass-border);
-  border-radius: 15px;
-  padding: 25px;
+  border-radius: 20px; /* Scaled from 15px */
+  padding: 32px; /* Scaled from 25px */
   position: relative;
   overflow: hidden;
   transition: all 0.3s ease;
@@ -49,42 +61,42 @@
 
 .sensor-card:hover {
   border-color: rgba(0, 255, 136, 0.4);
-  transform: translateY(-5px);
-  box-shadow: 0 10px 30px rgba(0, 255, 136, 0.1);
+  transform: translateY(-7px);
+  box-shadow: 0 12px 35px rgba(0, 255, 136, 0.15);
 }
 
 .sensor-title {
-  font-size: 0.7rem;
+  font-size: 0.875rem; /* Scaled from 0.7rem */
   color: #888;
   text-transform: uppercase;
-  letter-spacing: 2px;
-  margin-bottom: 15px;
+  letter-spacing: 2.5px;
+  margin-bottom: 20px;
 }
 
 .sensor-value {
-  font-size: 2.5rem;
+  font-size: 3.125rem; /* Scaled from 2.5rem */
   font-weight: 800;
   color: var(--text-main);
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   transition: all 0.3s ease;
 }
 
 /* Update Pulse Effect */
 .glow-pulse {
   color: var(--neon-green) !important;
-  text-shadow: 0 0 20px var(--neon-green);
+  text-shadow: 0 0 25px var(--neon-green);
 }
 
 .sensor-status {
-  font-size: 0.7rem;
+  font-size: 0.875rem; /* Scaled from 0.7rem */
   font-weight: 600;
-  padding: 4px 12px;
-  border-radius: 4px;
+  padding: 5px 15px; /* Scaled */
+  border-radius: 5px;
   text-transform: uppercase;
 }
 
 .status-good { color: var(--neon-green); background: rgba(0, 255, 136, 0.05); }
-.status-bad { color: #ff3b3b; background: rgba(255, 59, 59, 0.05); animation: blink 1s infinite; }
+.status-bad { color: var(--neon-red); background: rgba(255, 59, 59, 0.05); animation: blink 1s infinite; }
 .status-neutral { color: #888; background: rgba(255, 255, 255, 0.05); }
 
 /* Bottom Progress Bar */
@@ -93,7 +105,7 @@
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 4px;
+  height: 5px; /* Scaled from 4px */
   background: rgba(255,255,255,0.05);
 }
 
@@ -103,3 +115,23 @@
 }
 
 @keyframes blink { 50% { opacity: 0.5; } }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+/* --- Responsive Adjustments --- */
+@media screen and (max-width: 1024px) {
+  .sensor-grid {
+    grid-template-columns: repeat(2, 1fr); /* 2x2 for medium tablets */
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .sensor-grid {
+    grid-template-columns: 1fr; /* Single column for mobile */
+  }
+  .sensor-legend {
+    font-size: 2.2rem;
+  }
+  .sensor-value {
+    font-size: 2.5rem;
+  }
+}

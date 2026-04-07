@@ -8,6 +8,25 @@ function Control() {
   const [sensorData, setSensorData] = useState({});
   const [isDisconnected, setIsDisconnected] = useState(false);
 
+  const [selectedTimeouts, setSelectedTimeouts] = useState({
+    FanDecision: 7200,   // 2 hours default
+    WaterDecision: 300,  // 5 mins default
+    LEDDecision: 28800,  // 8 hours default
+    FertDecision: 300    // 5 mins default
+  });
+
+  const timeoutOptions = [
+    { label: "5 Minutes", value: 300 },
+    { label: "15 Minutes", value: 900 },
+    { label: "30 Minutes", value: 1800 },
+    { label: "1 Hour", value: 3600 },
+    { label: "2 Hours", value: 7200 },
+    { label: "4 Hours", value: 14400 },
+    { label: "8 Hours", value: 28800 },
+    { label: "12 Hours", value: 43200 },
+    { label: "24 Hours", value: 86400 },
+  ];
+
   const deviceSwitches = [
     { id: "FanDecision", label: "Fan Control" },
     { id: "WaterDecision", label: "Irrigation Pump" },
@@ -40,38 +59,64 @@ function Control() {
     return () => { unsubControls(); unsubSensors(); };
   }, []);
 
-  // 修改後的開關邏輯：僅在手動模式下允許操作
   const handleToggle = async (id) => {
     const currentVal = String(values[id] || "");
-    const isManual = currentVal.includes("MAN");
+    const isAuto = currentVal.includes("AUTO");
     
-    // 如果不是手動模式，直接攔截，不允許操作開關
-    if (!isManual) return;
+    // 🔥 NEW LOGIC: Block clicks only if it is in AUTO mode
+    if (isAuto) return;
 
     const isCurrentlyOn = currentVal.includes("_ON");
     const nextStatus = isCurrentlyOn ? "OFF" : "ON";
-    const newValue = `MAN_${nextStatus}`; // 在手動模式下切換，輸出必定是 MAN_...
+    
+    // Maintain the current prefix (LOCK or MAN)
+    const prefix = currentVal.includes("LOCK") ? "LOCK" : "MAN";
+    const newValue = `${prefix}_${nextStatus}`;
 
     try {
       await setDoc(doc(db, "Controls", "ai"), { [id]: newValue }, { merge: true });
     } catch (e) { console.error("Toggle failed", e); }
   };
 
-  // 修改後的模式切換：輸出簡化格式
   const handleModeToggle = async (e, id) => {
     e.stopPropagation(); 
     const currentVal = String(values[id] || "");
-    const isManual = currentVal.includes("MAN");
+    const isAuto = currentVal.includes("AUTO");
     const isCurrentlyOn = currentVal.includes("_ON");
-
-    // 切換模式但保留目前的開關狀態
-    const nextMode = isManual ? "AUTO" : "MAN";
     const status = isCurrentlyOn ? "ON" : "OFF";
-    const newValue = `${nextMode}_${status}`; // 輸出：AUTO_ON, MAN_OFF 等
+    
+    const nextMode = isAuto ? "MAN" : "AUTO";
+    const newValue = `${nextMode}_${status}`;
+  
+    try {
+      const payload = { [id]: newValue };
+      
+      if (isAuto) { 
+          // 🔥 2. When switching to MAN, send the chosen Limit from state
+          payload[`${id}_Limit`] = selectedTimeouts[id];
+      } else {
+          // Releasing to AI: Clean up
+          payload[`${id}_ExpirationTime`] = null; 
+      }
+      
+      await setDoc(doc(db, "Controls", "ai"), payload, { merge: true });
+    } catch (e) { console.error("Mode switch failed", e); }
+  };
+
+  // New Lock function
+  const handleLockToggle = async (e, id) => {
+    e.stopPropagation();
+    const currentVal = String(values[id] || "");
+    const isCurrentlyOn = currentVal.includes("_ON");
+    const isLocked = currentVal.includes("LOCK");
+    const status = isCurrentlyOn ? "ON" : "OFF";
+
+    // Toggle between LOCK and AUTO
+    const newValue = isLocked ? `AUTO_${status}` : `LOCK_${status}`;
 
     try {
       await setDoc(doc(db, "Controls", "ai"), { [id]: newValue }, { merge: true });
-    } catch (e) { console.error("Mode switch failed", e); }
+    } catch (e) { console.error("Lock toggle failed", e); }
   };
 
   const handleColorChange = async (color) => {
@@ -90,51 +135,121 @@ function Control() {
     }
   };
 
+  // No more TIMEOUT_CONFIG needed here!
+
+  function ExpiryTimer({ expirationTime }) {
+    const [timeLeft, setTimeLeft] = useState("");
+  
+    useEffect(() => {
+      const calculate = () => {
+        const nowInSeconds = Date.now() / 1000;
+        const remaining = expirationTime - nowInSeconds;
+  
+        if (remaining <= 0) {
+          setTimeLeft("REVERTING...");
+          return true; 
+        } else {
+          const h = Math.floor(remaining / 3600);
+          const m = Math.floor((remaining % 3600) / 60);
+          const s = Math.floor(remaining % 60);
+          
+          // Still formats nicely, but doesn't care about device types
+          const display = h > 0 
+            ? `${h}:${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`
+            : `${m}:${s < 10 ? '0' : ''}${s}`;
+              
+          setTimeLeft(display);
+          return false;
+        }
+      };
+  
+      calculate();
+      const interval = setInterval(() => {
+        if (calculate()) clearInterval(interval);
+      }, 1000);
+  
+      return () => clearInterval(interval);
+    }, [expirationTime]);
+  
+    return <span className="timer-val">{timeLeft}</span>;
+  }
+
   return (
     <div className={`control-container fade-in-up ${isDisconnected ? "disconnected" : ""}`}>
       <h1 className="control-title">AGiVEMS Command</h1>
 
       <div className="status-bar">
-        <div className="status-item"><span className="label">TEMP</span><span className="value">{sensorData.Temperature_C ?? "--"}°C</span></div>
+        <div className="status-item"><span className="label">TEMP: </span><span className="value">{sensorData.Temperature_C ?? "--"}°C</span></div>
         <div className="status-divider">|</div>
-        <div className="status-item"><span className="label">HUMIDITY</span><span className="value">{sensorData.Humidity ?? "--"}%</span></div>
+        <div className="status-item"><span className="label">HUMIDITY: </span><span className="value">{sensorData.Humidity ?? "--"}%</span></div>
         <div className="status-divider">|</div>
-        <div className="status-item"><span className="label">MOISTURE</span><span className="value">{sensorData.Moisture ?? "--"}%</span></div>
+        <div className="status-item"><span className="label">MOISTURE: </span><span className="value">{sensorData.Moisture ?? "--"}%</span></div>
         <div className="status-divider">|</div>
-        <div className="status-item"><span className="label">STATUS</span><span className={`value ${isDisconnected ? "error" : "glow"}`}>{isDisconnected ? "OFFLINE" : "ONLINE"}</span></div>
+        <div className="status-item"><span className="label">STATUS: </span><span className={`value ${isDisconnected ? "error" : "glow"}`}>{isDisconnected ? "OFFLINE" : "ONLINE"}</span></div>
       </div>
 
       <div className="main-layout-wrapper">
-        <div className="control-grid-four">
-        {deviceSwitches.map((sw, i) => {
-          const valStr = String(values[sw.id] || "");
-          const isOn = valStr.includes("_ON");
-          const isManual = valStr.includes("MAN");
+      <div className="control-grid-four">
+      {deviceSwitches.map((sw, i) => {
+        const valStr = String(values[sw.id] || "");
+        const isOn = valStr.includes("_ON");
+        const isAuto = valStr.includes("AUTO");
+        const isLocked = valStr.includes("LOCK");
+        const isManual = valStr.includes("MAN");
 
-          return (
-            <div key={i} className={`control-card ${isOn ? "on" : "off"} ${!isManual ? "is-locked" : ""}`}>
-              <div className="card-main-area" onClick={() => handleToggle(sw.id)}>
-                <div className="mode-indicator">
-                  {/* 如果是 AI 模式，在文字後方加上鎖頭 */}
-                  {isManual ? "👤 MANUAL" : "🤖 AI AUTO 🔒"}
-                </div>
-                
-                {/* 這裡移除了原本的 lock-overlay div */}
-                
-                {getDeviceIcon(sw.id, isOn)}
-                <h2>{sw.label}</h2>
-                <div className="status-badge">{isOn ? "ACTIVE" : "IDLE"}</div>
+        return (
+          <div key={i} className={`control-card ${isOn ? "on" : "off"} ${isAuto ? "is-auto" : ""} ${isLocked ? "locked-state" : ""}`}>
+            
+            <button className="thin-lock-btn" onClick={(e) => handleLockToggle(e, sw.id)}>
+              {isLocked ? "🔓 UNLOCK" : "🔒 LOCK"}
+            </button>
+
+            <div className="card-main-area" onClick={() => handleToggle(sw.id)}>
+              <div className="mode-indicator">
+                {isLocked ? "🚫 LOCKED" : isManual ? "👤 MANUAL" : "🤖 AI AUTO"}
               </div>
               
-              <button 
-                className={`mode-toggle-btn ${isManual ? "btn-to-auto" : "btn-to-man"}`}
-                onClick={(e) => handleModeToggle(e, sw.id)}
-              >
-                {isManual ? "RELEASE TO AI" : "TAKE MANUAL CONTROL"}
-              </button>
+              {getDeviceIcon(sw.id, isOn)}
+              <h2>{sw.label}</h2>
+              
+              <div className="status-badge">
+                {isAuto ? "AI MANAGED" : (isOn ? "ACTIVE" : "IDLE")}
+              </div>
+
+              {isManual && values[`${sw.id}_ExpirationTime`] && (
+                <div className="expiration-timer">
+                  AI TAKEOVER IN: 
+                  <ExpiryTimer expirationTime={values[`${sw.id}_ExpirationTime`]} />
+                </div>
+              )}
             </div>
+
+            {/* 🔥 3. NEW: Timeout Dropdown Selection */}
+            <div className="timeout-selector-area">
+              <label>AUTO-REVERT AFTER:</label>
+              <select 
+                value={selectedTimeouts[sw.id]} 
+                disabled={isManual} // Gray out when in Manual
+                onChange={(e) => setSelectedTimeouts({
+                  ...selectedTimeouts, 
+                  [sw.id]: Number(e.target.value)
+                })}
+              >
+                {timeoutOptions.map(opt => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+            </div>
+            
+            <button 
+              className={`mode-toggle-btn ${!isAuto ? "btn-to-auto" : "btn-to-man"}`}
+              onClick={(e) => handleModeToggle(e, sw.id)}
+            >
+              {!isAuto ? "RELEASE TO AI" : "TAKE MANUAL CONTROL"}
+            </button>
+          </div>
           );
-        })}
+          })}
         </div>
       </div>
 
@@ -149,6 +264,21 @@ function Control() {
                 style={{ backgroundColor: color, boxShadow: isSelected ? `0 0 20px ${color}` : 'none' }} />
             );
           })}
+        </div>
+      </div>
+      {/* --- Added System Logic Guide --- */}
+      <div className="system-logic-guide">
+        <div className="guide-item">
+          <span className="guide-title">🤖 AI AUTO</span>
+          <p>The neural network manages the environment based on real-time sensor data to optimize plant growth.</p>
+        </div>
+        <div className="guide-item">
+          <span className="guide-title">👤 MANUAL</span>
+          <p>Temporary user override. The system will revert to AI control after a safety timeout period expires.</p>
+        </div>
+        <div className="guide-item">
+          <span className="guide-title">🔒 LOCK</span>
+          <p>Permanent manual override. Disables AI control for this component until manually unlocked by the user.</p>
         </div>
       </div>
     </div>

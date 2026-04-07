@@ -1,51 +1,51 @@
-/* home.css */
+/* home.css (Scaled 1.25x) */
 
 .home-container {
   width: 100%;
   text-align: center;
-  /* Font is inherited globally from App.css */
+  padding: 50px 25px; /* Added padding for better spacing */
   animation: fadeIn 0.8s ease-out;
 }
 
 .home-header {
-  margin-bottom: 50px;
+  margin-bottom: 62px; /* Scaled from 50px */
 }
 
 .home-title {
-  font-size: 3rem;
+  font-size: 3.75rem; /* Scaled from 3rem */
   font-weight: 800;
-  letter-spacing: 2px;
-  margin-bottom: 10px;
+  letter-spacing: 2.5px;
+  margin-bottom: 12px;
   background: linear-gradient(to right, var(--neon-green), var(--neon-blue));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .home-subtitle {
-  font-size: 0.9rem;
+  font-size: 1.125rem; /* Scaled from 0.9rem */
   color: #888;
-  letter-spacing: 5px;
+  letter-spacing: 6.25px;
   text-transform: uppercase;
 }
 
 /* --- Card Grid --- */
 .home-grid {
   display: grid;
-  /* Automatically fits items, making it perfectly responsive */
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 25px;
-  max-width: 1200px;
+  /* Scaled min-width to 350px to accommodate larger text */
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 32px; /* Scaled from 25px */
+  max-width: 1500px; /* Scaled from 1200px */
   margin: 0 auto;
 }
 
 /* --- Glassmorphism Cards --- */
 .home-card {
   background: var(--glass-bg);
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
   border: 1px solid var(--glass-border);
-  border-radius: 20px;
-  padding: 35px 20px;
+  border-radius: 25px; /* Scaled from 20px */
+  padding: 44px 25px; /* Scaled from 35px 20px */
   text-decoration: none;
   color: var(--text-main);
   display: flex;
@@ -56,14 +56,14 @@
   overflow: hidden;
 }
 
-/* Glowing top border effect on hover */
+/* Glowing top border effect */
 .home-card::before {
   content: '';
   position: absolute;
   top: 0; 
   left: 0; 
   width: 100%; 
-  height: 3px;
+  height: 4px; /* Scaled from 3px */
   background: var(--neon-green);
   transform: scaleX(0);
   transition: transform 0.3s ease;
@@ -72,10 +72,10 @@
 
 /* Hover States */
 .home-card:hover {
-  transform: translateY(-5px);
+  transform: translateY(-7px); /* Scaled from -5px */
   background: rgba(255, 255, 255, 0.08);
   border-color: rgba(0, 255, 136, 0.3);
-  box-shadow: 0 10px 30px rgba(0, 255, 136, 0.1);
+  box-shadow: 0 12px 35px rgba(0, 255, 136, 0.15);
 }
 
 .home-card:hover::before {
@@ -83,9 +83,9 @@
 }
 
 .card-icon {
-  font-size: 3.5rem;
-  margin-bottom: 15px;
-  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.1));
+  font-size: 4.375rem; /* Scaled from 3.5rem */
+  margin-bottom: 20px;
+  filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.1));
   transition: transform 0.3s ease;
 }
 
@@ -94,58 +94,58 @@
 }
 
 .card-content h2 {
-  font-size: 1.5rem;
+  font-size: 1.875rem; /* Scaled from 1.5rem */
   color: var(--neon-green);
-  margin-bottom: 10px;
-  letter-spacing: 1px;
+  margin-bottom: 12px;
+  letter-spacing: 1.25px;
   text-transform: uppercase;
 }
 
 .card-content p {
-  font-size: 0.85rem;
+  font-size: 1.06rem; /* Scaled from 0.85rem */
   color: #aaa;
-  line-height: 1.5;
-  margin-bottom: 25px;
+  line-height: 1.6;
+  margin-bottom: 32px;
 }
 
 .card-action {
   margin-top: auto;
-  font-size: 0.75rem;
+  font-size: 0.94rem; /* Scaled from 0.75rem */
   font-weight: 700;
   color: #555;
-  letter-spacing: 2px;
+  letter-spacing: 2.5px;
   transition: color 0.3s ease, letter-spacing 0.3s ease;
 }
 
 .home-card:hover .card-action {
   color: var(--neon-green);
-  letter-spacing: 4px;
+  letter-spacing: 5px; /* Scaled from 4px */
 }
 
 /* --- Animations --- */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
+  from { opacity: 0; transform: translateY(25px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 /* --- Responsive Layout --- */
 @media screen and (max-width: 768px) {
   .home-header {
-    margin-bottom: 30px;
+    margin-bottom: 40px;
   }
   .home-title {
-    font-size: 2rem;
+    font-size: 2.5rem;
   }
   .home-subtitle {
-    font-size: 0.7rem;
-    letter-spacing: 3px;
+    font-size: 0.85rem;
+    letter-spacing: 4px;
   }
   .home-grid {
-    grid-template-columns: 1fr; /* Stack cards on mobile */
-    gap: 20px;
-    padding: 0 10px;
+    grid-template-columns: 1fr;
+    gap: 25px;
+    padding: 0 15px;
   }
   .home-card {
-    padding: 25px 15px;
+    padding: 32px 20px;
   }
 }

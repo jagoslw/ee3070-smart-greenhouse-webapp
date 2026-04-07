@@ -1,119 +1,167 @@
+/* --- AGiVEMS V7.4 Core Design System (Scaled 1.25x) --- */
 :root {
   --neon-green: #00ff88;
   --neon-red: #ff3b3b;
   --neon-blue: #60a5fa;
+  --neon-gold: rgba(255, 204, 0, 0.8);
   --glass-border: rgba(255, 255, 255, 0.1);
+  --bg-dark: #0d0d0d;
+  --font-mono: "JetBrains Mono", monospace;
 }
 
-/* --- Global Backgrounds --- */
-body.global-online-bg { background: radial-gradient(circle at top right, #1a2c2a, #0d0d0d) !important; transition: 0.8s; }
-body.global-offline-bg { background: radial-gradient(circle at top right, #3d0a0a, #0d0d0d) !important; transition: 0.8s; }
+/* --- Base Reset & Animations --- */
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
-.control-container {
-  min-height: 100vh;
-  padding: 40px 20px;
-  color: #e0e0e0;
-  font-family: "JetBrains Mono", monospace;
+body { 
+  font-family: var(--font-mono); 
+  color: #e0e0e0; 
+  overflow-x: hidden; 
+  font-size: 20px; /* Scaled up from 16px */
 }
 
-/* --- Entrance Animation --- */
+body.global-online-bg { background: radial-gradient(circle at top right, #1a2c2a, var(--bg-dark)) !important; transition: 0.8s; }
+body.global-offline-bg { background: radial-gradient(circle at top right, #3d0a0a, var(--bg-dark)) !important; transition: 0.8s; }
+
+.control-container { min-height: 100vh; padding: 50px 25px; }
+
 .fade-in-up { animation: fadeInUp 0.8s ease-out forwards; }
-@keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
-/* --- UI Components --- */
-.control-title { font-size: 2.5rem; text-align: center; background: linear-gradient(to right, var(--neon-green), var(--neon-blue)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 20px; }
-
-.status-bar {
-  display: flex; justify-content: center; align-items: center; gap: 30px;
-  background: rgba(255, 255, 255, 0.03); border: 1px solid var(--glass-border);
-  padding: 12px 30px; border-radius: 50px; max-width: 750px; margin: 0 auto 40px; backdrop-filter: blur(10px);
+@keyframes fadeInUp { 
+  from { opacity: 0; transform: translateY(25px); } 
+  to { opacity: 1; transform: translateY(0); } 
 }
-.status-item .label { font-size: 0.6rem; color: #888; }
-.status-item .value { font-size: 1.1rem; color: var(--neon-green); font-weight: 700; }
-.status-item .value.glow { text-shadow: 0 0 12px var(--neon-green); }
-.status-item .value.error { color: var(--neon-red); text-shadow: 0 0 12px var(--neon-red); }
 
-/* --- Grid & Cards --- */
-.main-layout-wrapper { max-width: 1100px; margin: 0 auto; }
-.control-grid-four { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+/* --- Header --- */
+.control-title { 
+  font-size: clamp(2rem, 6.5vw, 3.25rem); /* Scaled from 2.5rem */
+  text-align: center; 
+  background: linear-gradient(to right, var(--neon-green), var(--neon-blue)); 
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
+  margin-bottom: 30px; 
+}
 
+/* --- Responsive Status Bar --- */
+.status-bar {
+  display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 20px 35px;
+  background: rgba(255, 255, 255, 0.03); border: 1px solid var(--glass-border);
+  padding: 20px 40px; border-radius: 35px; max-width: 1050px; margin: 0 auto 50px; backdrop-filter: blur(10px);
+}
+
+.status-item { display: flex; align-items: center; gap: 10px; font-size: 1.1rem; }
+.status-item .label { color: #888; }
+.status-item .value { color: var(--neon-green); font-weight: 700; }
+.status-item .value.glow { text-shadow: 0 0 15px var(--neon-green); }
+.status-item .value.error { color: var(--neon-red); text-shadow: 0 0 15px var(--neon-red); }
+
+.status-divider { color: var(--glass-border); font-weight: 100; font-size: 1.3rem; }
+
+/* --- Grid System --- */
+.main-layout-wrapper { max-width: 1350px; margin: 0 auto; }
+.control-grid-four { 
+  display: grid; 
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Scaled min-width */
+  gap: 25px; 
+}
+
+/* --- Card Architecture --- */
 .control-card {
   background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px);
-  border: 1px solid var(--glass-border); border-radius: 20px;
-  display: flex; flex-direction: column; overflow: hidden; transition: 0.3s ease;
+  border: 1px solid var(--glass-border); border-radius: 25px;
+  display: flex; flex-direction: column; overflow: hidden; transition: 0.4s ease;
   position: relative;
 }
-.control-card.on { border-color: var(--neon-green); box-shadow: 0 0 15px rgba(0, 255, 136, 0.1); }
 
-/* 當處於 AI 模式時的鎖定視覺 */
-.control-card.is-locked .card-main-area {
-  cursor: not-allowed;
-  opacity: 0.6;
+.control-card.on { border-color: var(--neon-green); box-shadow: 0 0 20px rgba(0, 255, 136, 0.2); }
+.control-card.off { border-color: var(--glass-border); }
+.control-card.locked-state { border-color: var(--neon-gold); }
+
+.control-card.is-auto .card-main-area {
+  cursor: not-allowed; pointer-events: none; filter: grayscale(1) opacity(0.4);
 }
 
+/* --- Card Components --- */
+.thin-lock-btn {
+  background: rgba(255, 255, 255, 0.03); border: none;
+  border-bottom: 1px solid var(--glass-border); color: rgba(255, 255, 255, 0.4);
+  font-size: 0.8rem; padding: 12px 0; width: 100%; cursor: pointer; transition: 0.3s;
+  letter-spacing: 1.5px;
+}
+.thin-lock-btn:hover { background: rgba(255, 255, 255, 0.1); color: #fff; }
 
-.card-main-area { padding: 30px 20px; cursor: pointer; text-align: center; flex-grow: 1; }
-/* 移除原本的 .lock-overlay 樣式 */
+.card-main-area { padding: 35px 25px; text-align: center; flex-grow: 1; display: flex; flex-direction: column; align-items: center; }
 
 .mode-indicator { 
-  font-size: 0.65rem; 
-  font-weight: 800; 
-  color: #888; 
-  margin-bottom: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px; /* 讓文字與鎖頭之間有微小間距 */
+  font-size: 0.8rem; font-weight: 800; color: #666; 
+  margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1.5px;
 }
+.on .mode-indicator { color: var(--neon-green); opacity: 1; }
 
-/* 讓 AI 模式下的指示燈稍微帶點藍色，區分狀態 */
-.is-locked .mode-indicator {
-  color: var(--neon-blue);
-  opacity: 0.8;
+.control-card h2 { font-size: 1.4rem; margin: 15px 0 10px; color: #fff; }
+
+.status-badge { 
+  font-size: 0.8rem; font-weight: 800; padding: 6px 15px; border-radius: 50px; 
+  background: rgba(255,255,255,0.05); color: #777; 
 }
-
-/* 保持原本的 ON 狀態顏色 */
-.on .mode-indicator { 
-  color: var(--neon-green); 
-}
-
-/* 確保鎖定時圖示變暗的邏輯依然存在 */
-.is-locked .device-icon { 
-  filter: grayscale(1) opacity(0.4); 
-}
-
-.control-card h2 { font-size: 1.1rem; margin: 15px 0 5px; color: #fff; }
-.status-badge { font-size: 0.65rem; font-weight: 800; padding: 4px 10px; border-radius: 50px; background: rgba(255,255,255,0.05); color: #888; }
 .on .status-badge { background: rgba(0,255,136,0.1); color: var(--neon-green); }
 
-/* --- Mode Toggle Button --- */
+/* --- Dynamic Timeout Selector --- */
+.timeout-selector-area {
+  padding: 15px; background: rgba(0, 0, 0, 0.2); margin: 0 20px 20px; border-radius: 10px;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.timeout-selector-area label { font-size: 0.7rem; color: #666; text-transform: uppercase; letter-spacing: 1.5px; }
+.timeout-selector-area select {
+  background: #1a1a1a; color: #fff; border: 1px solid #333;
+  padding: 10px; border-radius: 5px; font-size: 0.95rem; font-family: inherit; cursor: pointer;
+}
+.timeout-selector-area select:disabled { opacity: 0.3; cursor: not-allowed; }
+
+/* --- Expiration Timer --- */
+.expiration-timer { margin-top: 15px; font-size: 0.75rem; color: var(--neon-blue); font-weight: 600; }
+.timer-val {
+  background: rgba(96, 165, 250, 0.15); padding: 3px 8px; border-radius: 5px; margin-left: 6px; color: #fff;
+}
+
+/* --- Action Buttons --- */
 .mode-toggle-btn {
   width: 100%; border: none; border-top: 1px solid var(--glass-border);
-  padding: 12px 0; font-size: 0.65rem; font-family: inherit; font-weight: 800;
-  cursor: pointer; transition: 0.3s; letter-spacing: 1.5px;
+  padding: 18px 0; font-size: 0.85rem; font-family: inherit; font-weight: 800;
+  cursor: pointer; transition: 0.3s; letter-spacing: 1.5px; text-transform: uppercase;
 }
-.btn-to-man { background: rgba(96, 165, 250, 0.1); color: var(--neon-blue); }
-.btn-to-man:hover { background: rgba(96, 165, 250, 0.25); color: #fff; }
-.btn-to-auto { background: rgba(0, 255, 136, 0.15); color: var(--neon-green); border-top-color: var(--neon-green); }
-.btn-to-auto:hover { background: rgba(0, 255, 136, 0.3); color: #fff; }
+.btn-to-man { background: rgba(96, 165, 250, 0.08); color: var(--neon-blue); }
+.btn-to-auto { background: rgba(0, 255, 136, 0.12); color: var(--neon-green); }
 
-/* --- Icons & Animations --- */
-.device-icon { font-size: 2.2rem; display: inline-block; transition: 0.3s; }
-.is-locked .device-icon { filter: grayscale(1) opacity(0.5); }
+/* --- Icons --- */
+.device-icon { font-size: 3rem; margin-bottom: 8px; filter: drop-shadow(0 0 10px rgba(255,255,255,0.1)); }
 .icon-spin { animation: spin 3s linear infinite; }
 .icon-pulse { animation: pulse 2s ease-in-out infinite; }
+
 @keyframes spin { from { transform: rotate(0); } to { transform: rotate(360deg); } }
-@keyframes pulse { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.1); opacity: 1; } }
+@keyframes pulse { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.08); opacity: 1; } }
 
-/* --- Color Selector --- */
-.color-selection-section { background: rgba(255,255,255,0.03); border-radius: 25px; padding: 30px; margin: 50px auto 0; text-align: center; max-width: 1100px; }
-.color-btn-wrapper { display: flex; justify-content: space-evenly; gap: 10px; margin-top: 20px; }
-.color-btn { width: 45px; height: 45px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; transition: 0.3s; }
-.color-btn.selected { border-color: #fff; transform: scale(1.1); }
+/* --- LED Color Section --- */
+.color-selection-section { 
+  background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border);
+  border-radius: 30px; padding: 40px; margin: 75px auto 25px; text-align: center; max-width: 1000px; 
+}
+.color-selection-section h3 { font-size: 1rem; margin-bottom: 25px; letter-spacing: 2.5px; color: #888; }
+.color-btn-wrapper { display: flex; justify-content: center; gap: 25px; flex-wrap: wrap; }
+.color-btn { width: 55px; height: 55px; border-radius: 50%; border: 4px solid transparent; cursor: pointer; transition: 0.3s; }
+.color-btn.selected { border-color: #fff; transform: translateY(-7px); box-shadow: 0 12px 25px rgba(0,0,0,0.5); }
 
-/* --- Mobile --- */
-@media screen and (max-width: 768px) {
-  .status-bar { gap: 10px; padding: 10px 15px; width: 95%; }
-  .status-item .value { font-size: 0.9rem; }
-  .control-grid-four { grid-template-columns: repeat(2, 1fr); gap: 15px; }
+/* --- System Guide --- */
+.system-logic-guide {
+  max-width: 1250px; margin: 50px auto; display: flex; flex-wrap: wrap; justify-content: center;
+  gap: 40px; padding: 40px 25px; border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+.guide-item { flex: 1; min-width: 300px; text-align: center; }
+.guide-title { font-size: 0.95rem; font-weight: 800; display: block; margin-bottom: 12px; }
+.guide-item p { font-size: 0.85rem; color: #555; line-height: 1.7; }
+
+/* --- Responsive Adjustments --- */
+@media (max-width: 768px) {
+  .status-bar { border-radius: 20px; padding: 20px; gap: 15px; }
+  .status-divider { display: none; }
+  .status-item { width: 45%; justify-content: center; font-size: 0.9rem; }
+  .control-grid-four { grid-template-columns: 1fr; }
+  .color-btn { width: 45px; height: 45px; }
 }

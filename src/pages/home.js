@@ -7,6 +7,7 @@ function Home() {
   const pages = [
     { title: "Sensors", description: "Real-time environment telemetry", path: "/sensors", icon: "🌡️" },
     { title: "Control", description: "Manual override & AI autopilot", path: "/control", icon: "🎮" },
+    { title: "Chat", description: "Interactive AI chat interface", path: "/chat", icon: "💬" },
     { title: "Camera", description: "Live optical feed & vision processing", path: "/camera", icon: "📸" },
     { title: "Reports", description: "Historical data logs & analytics", path: "/reports", icon: "📝" },
     { title: "About Us", description: "System architecture & dev team", path: "/aboutus", icon: "ℹ️" },

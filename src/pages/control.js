@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { db } from "../components/firebase"; 
-import { doc, setDoc, onSnapshot } from "firebase/firestore";
+import { db, rtdb } from "../components/firebase"; 
+import { doc, onSnapshot } from "firebase/firestore";
+import { ref, update, onValue } from "firebase/database";
 import "./control.css";
 
 function Control() {
@@ -9,10 +10,10 @@ function Control() {
   const [isDisconnected, setIsDisconnected] = useState(false);
 
   const [selectedTimeouts, setSelectedTimeouts] = useState({
-    FanDecision: 7200,   // 2 hours default
-    WaterDecision: 300,  // 5 mins default
-    LEDDecision: 28800,  // 8 hours default
-    FertDecision: 300    // 5 mins default
+    FanDecision: 7200,   
+    WaterDecision: 300,  
+    LEDDecision: 28800,  
+    FertDecision: 300    
   });
 
   const timeoutOptions = [
@@ -43,15 +44,20 @@ function Control() {
   }, [isDisconnected]);
 
   useEffect(() => {
-    const unsubControls = onSnapshot(doc(db, "Controls", "ai"), (snapshot) => {
-      if (snapshot.exists()) setValues(snapshot.data());
+    // 1. Listen to RTDB for Controls (Using rtdb)
+    const controlsRef = ref(rtdb, "Controls");
+    const unsubControls = onValue(controlsRef, (snapshot) => {
+      if (snapshot.exists()) setValues(snapshot.val());
     });
 
+    // 2. Listen to Firestore for Sensors (Using db)
     const unsubSensors = onSnapshot(doc(db, "Environment", "0000000"), (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.data();
         setSensorData(data);
-        const lastUpdate = data.timestamp?.seconds ? data.timestamp.seconds * 1000 : new Date(data.timestamp).getTime();
+        const lastUpdate = data.timestamp?.seconds 
+          ? data.timestamp.seconds * 1000 
+          : new Date(data.timestamp).getTime();
         setIsDisconnected(Date.now() - lastUpdate > 45000 || (data.Temperature_C === 0 && data.Humidity === 0));
       }
     });
@@ -61,20 +67,16 @@ function Control() {
 
   const handleToggle = async (id) => {
     const currentVal = String(values[id] || "");
-    const isAuto = currentVal.includes("AUTO");
-    
-    // 🔥 NEW LOGIC: Block clicks only if it is in AUTO mode
-    if (isAuto) return;
+    if (currentVal.includes("AUTO")) return;
 
     const isCurrentlyOn = currentVal.includes("_ON");
     const nextStatus = isCurrentlyOn ? "OFF" : "ON";
-    
-    // Maintain the current prefix (LOCK or MAN)
     const prefix = currentVal.includes("LOCK") ? "LOCK" : "MAN";
     const newValue = `${prefix}_${nextStatus}`;
 
     try {
-      await setDoc(doc(db, "Controls", "ai"), { [id]: newValue }, { merge: true });
+      // WRITE TO RTDB
+      await update(ref(rtdb, "Controls"), { [id]: newValue });
     } catch (e) { console.error("Toggle failed", e); }
   };
 
@@ -90,38 +92,32 @@ function Control() {
   
     try {
       const payload = { [id]: newValue };
-      
       if (isAuto) { 
-          // 🔥 2. When switching to MAN, send the chosen Limit from state
           payload[`${id}_Limit`] = selectedTimeouts[id];
       } else {
-          // Releasing to AI: Clean up
-          payload[`${id}_ExpirationTime`] = null; 
+          payload[`${id}_ExpirationTime`] = null; // RTDB deletes on null
       }
-      
-      await setDoc(doc(db, "Controls", "ai"), payload, { merge: true });
+      // WRITE TO RTDB
+      await update(ref(rtdb, "Controls"), payload);
     } catch (e) { console.error("Mode switch failed", e); }
   };
 
-  // New Lock function
   const handleLockToggle = async (e, id) => {
     e.stopPropagation();
     const currentVal = String(values[id] || "");
-    const isCurrentlyOn = currentVal.includes("_ON");
-    const isLocked = currentVal.includes("LOCK");
-    const status = isCurrentlyOn ? "ON" : "OFF";
-
-    // Toggle between LOCK and AUTO
-    const newValue = isLocked ? `AUTO_${status}` : `LOCK_${status}`;
+    const status = currentVal.includes("_ON") ? "ON" : "OFF";
+    const newValue = currentVal.includes("LOCK") ? `AUTO_${status}` : `LOCK_${status}`;
 
     try {
-      await setDoc(doc(db, "Controls", "ai"), { [id]: newValue }, { merge: true });
+      // WRITE TO RTDB
+      await update(ref(rtdb, "Controls"), { [id]: newValue });
     } catch (e) { console.error("Lock toggle failed", e); }
   };
 
   const handleColorChange = async (color) => {
     try {
-      await setDoc(doc(db, "Controls", "ai"), { color: color.toUpperCase() }, { merge: true });
+      // WRITE TO RTDB
+      await update(ref(rtdb, "Controls"), { color: color.toUpperCase() });
     } catch (e) { console.error("Color change failed", e); }
   };
 
@@ -135,42 +131,25 @@ function Control() {
     }
   };
 
-  // No more TIMEOUT_CONFIG needed here!
-
   function ExpiryTimer({ expirationTime }) {
     const [timeLeft, setTimeLeft] = useState("");
-  
     useEffect(() => {
       const calculate = () => {
-        const nowInSeconds = Date.now() / 1000;
-        const remaining = expirationTime - nowInSeconds;
-  
+        const remaining = expirationTime - (Date.now() / 1000);
         if (remaining <= 0) {
           setTimeLeft("REVERTING...");
           return true; 
-        } else {
-          const h = Math.floor(remaining / 3600);
-          const m = Math.floor((remaining % 3600) / 60);
-          const s = Math.floor(remaining % 60);
-          
-          // Still formats nicely, but doesn't care about device types
-          const display = h > 0 
-            ? `${h}:${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`
-            : `${m}:${s < 10 ? '0' : ''}${s}`;
-              
-          setTimeLeft(display);
-          return false;
         }
+        const h = Math.floor(remaining / 3600);
+        const m = Math.floor((remaining % 3600) / 60);
+        const s = Math.floor(remaining % 60);
+        setTimeLeft(h > 0 ? `${h}:${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}` : `${m}:${s < 10 ? '0' : ''}${s}`);
+        return false;
       };
-  
       calculate();
-      const interval = setInterval(() => {
-        if (calculate()) clearInterval(interval);
-      }, 1000);
-  
+      const interval = setInterval(() => { if (calculate()) clearInterval(interval); }, 1000);
       return () => clearInterval(interval);
     }, [expirationTime]);
-  
     return <span className="timer-val">{timeLeft}</span>;
   }
 
@@ -189,66 +168,48 @@ function Control() {
       </div>
 
       <div className="main-layout-wrapper">
-      <div className="control-grid-four">
-      {deviceSwitches.map((sw, i) => {
-        const valStr = String(values[sw.id] || "");
-        const isOn = valStr.includes("_ON");
-        const isAuto = valStr.includes("AUTO");
-        const isLocked = valStr.includes("LOCK");
-        const isManual = valStr.includes("MAN");
+        <div className="control-grid-four">
+          {deviceSwitches.map((sw, i) => {
+            const valStr = String(values[sw.id] || "");
+            const isOn = valStr.includes("_ON");
+            const isAuto = valStr.includes("AUTO");
+            const isLocked = valStr.includes("LOCK");
+            const isManual = valStr.includes("MAN");
 
-        return (
-          <div key={i} className={`control-card ${isOn ? "on" : "off"} ${isAuto ? "is-auto" : ""} ${isLocked ? "locked-state" : ""}`}>
-            
-            <button className="thin-lock-btn" onClick={(e) => handleLockToggle(e, sw.id)}>
-              {isLocked ? "🔓 UNLOCK" : "🔒 LOCK"}
-            </button>
+            return (
+              <div key={i} className={`control-card ${isOn ? "on" : "off"} ${isAuto ? "is-auto" : ""} ${isLocked ? "locked-state" : ""}`}>
+                <button className="thin-lock-btn" onClick={(e) => handleLockToggle(e, sw.id)}>
+                  {isLocked ? "🔓 UNLOCK" : "🔒 LOCK"}
+                </button>
 
-            <div className="card-main-area" onClick={() => handleToggle(sw.id)}>
-              <div className="mode-indicator">
-                {isLocked ? "🚫 LOCKED" : isManual ? "👤 MANUAL" : "🤖 AI AUTO"}
-              </div>
-              
-              {getDeviceIcon(sw.id, isOn)}
-              <h2>{sw.label}</h2>
-              
-              <div className="status-badge">
-                {isAuto ? "AI MANAGED" : (isOn ? "ACTIVE" : "IDLE")}
-              </div>
-
-              {isManual && values[`${sw.id}_ExpirationTime`] && (
-                <div className="expiration-timer">
-                  AI TAKEOVER IN: 
-                  <ExpiryTimer expirationTime={values[`${sw.id}_ExpirationTime`]} />
+                <div className="card-main-area" onClick={() => handleToggle(sw.id)}>
+                  <div className="mode-indicator">{isLocked ? "🚫 LOCKED" : isManual ? "👤 MANUAL" : "🤖 AI AUTO"}</div>
+                  {getDeviceIcon(sw.id, isOn)}
+                  <h2>{sw.label}</h2>
+                  <div className="status-badge">{isAuto ? "AI MANAGED" : (isOn ? "ACTIVE" : "IDLE")}</div>
+                  {isManual && values[`${sw.id}_ExpirationTime`] && (
+                    <div className="expiration-timer">
+                      AI TAKEOVER IN: <ExpiryTimer expirationTime={values[`${sw.id}_ExpirationTime`]} />
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
 
-            {/* 🔥 3. NEW: Timeout Dropdown Selection */}
-            <div className="timeout-selector-area">
-              <label>AUTO-REVERT AFTER:</label>
-              <select 
-                value={selectedTimeouts[sw.id]} 
-                disabled={isManual} // Gray out when in Manual
-                onChange={(e) => setSelectedTimeouts({
-                  ...selectedTimeouts, 
-                  [sw.id]: Number(e.target.value)
-                })}
-              >
-                {timeoutOptions.map(opt => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
-                ))}
-              </select>
-            </div>
-            
-            <button 
-              className={`mode-toggle-btn ${!isAuto ? "btn-to-auto" : "btn-to-man"}`}
-              onClick={(e) => handleModeToggle(e, sw.id)}
-            >
-              {!isAuto ? "RELEASE TO AI" : "TAKE MANUAL CONTROL"}
-            </button>
-          </div>
-          );
+                <div className="timeout-selector-area">
+                  <label>AUTO-REVERT AFTER:</label>
+                  <select 
+                    value={selectedTimeouts[sw.id]} 
+                    disabled={isManual} 
+                    onChange={(e) => setSelectedTimeouts({...selectedTimeouts, [sw.id]: Number(e.target.value)})}
+                  >
+                    {timeoutOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+                  </select>
+                </div>
+                
+                <button className={`mode-toggle-btn ${!isAuto ? "btn-to-auto" : "btn-to-man"}`} onClick={(e) => handleModeToggle(e, sw.id)}>
+                  {!isAuto ? "RELEASE TO AI" : "TAKE MANUAL CONTROL"}
+                </button>
+              </div>
+            );
           })}
         </div>
       </div>
@@ -264,21 +225,6 @@ function Control() {
                 style={{ backgroundColor: color, boxShadow: isSelected ? `0 0 20px ${color}` : 'none' }} />
             );
           })}
-        </div>
-      </div>
-      {/* --- Added System Logic Guide --- */}
-      <div className="system-logic-guide">
-        <div className="guide-item">
-          <span className="guide-title">🤖 AI AUTO</span>
-          <p>The neural network manages the environment based on real-time sensor data to optimize plant growth.</p>
-        </div>
-        <div className="guide-item">
-          <span className="guide-title">👤 MANUAL</span>
-          <p>Temporary user override. The system will revert to AI control after a safety timeout period expires.</p>
-        </div>
-        <div className="guide-item">
-          <span className="guide-title">🔒 LOCK</span>
-          <p>Permanent manual override. Disables AI control for this component until manually unlocked by the user.</p>
         </div>
       </div>
     </div>

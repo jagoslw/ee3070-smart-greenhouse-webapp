@@ -7,6 +7,7 @@ import AboutUs from "./pages/aboutus";
 import Control from "./pages/control";
 import Camera from "./pages/camera";
 import Home from "./pages/home";
+import Chat from "./pages/chat";
 import DebugPage from "./pages/debugPage"; // 新增 DebugPage 引入
 
 import "./App.css";
@@ -34,6 +35,10 @@ function Navigation() {
       <Link to="/camera" className={`nav-item ${isActive("/camera") ? "active" : ""}`}>
         <span className="nav-icon">📸</span>
         <span className="nav-label">Cam</span>
+      </Link>
+      <Link to="/chat" className={`nav-item ${isActive("/chat") ? "active" : ""}`}>
+        <span className="nav-icon">💬</span>
+        <span className="nav-label">Chat</span>
       </Link>
       <Link to="/reports" className={`nav-item ${isActive("/reports") ? "active" : ""}`}>
         <span className="nav-icon">📝</span>
@@ -63,6 +68,7 @@ function App() {
             <Link to="/sensors">Sensors</Link>
             <Link to="/control">Control</Link>
             <Link to="/camera">Camera</Link>
+            <Link to="/chat">Chat</Link>
             <Link to="/reports">Reports</Link>
             <Link to="/aboutus">About Us</Link>
             <a href="https://jagoslw.github.io" target="_blank" rel="noreferrer">GitHub</a>
@@ -78,6 +84,7 @@ function App() {
             <Route path="/reports" element={<Reports />} />
             <Route path="/aboutus" element={<AboutUs />} />
             <Route path="/camera" element={<Camera />} />
+            <Route path="/chat" element={<Chat />} />
             <Route path="/debug" element={<DebugPage />} /> {/* 新增 DebugPage 路由 */}
           </Routes>
         </main>

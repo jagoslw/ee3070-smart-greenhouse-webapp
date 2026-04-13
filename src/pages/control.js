@@ -44,13 +44,11 @@ function Control() {
   }, [isDisconnected]);
 
   useEffect(() => {
-    // 1. Listen to RTDB for Controls (Using rtdb)
     const controlsRef = ref(rtdb, "Controls");
     const unsubControls = onValue(controlsRef, (snapshot) => {
       if (snapshot.exists()) setValues(snapshot.val());
     });
 
-    // 2. Listen to Firestore for Sensors (Using db)
     const unsubSensors = onSnapshot(doc(db, "Environment", "0000000"), (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.data();
@@ -67,15 +65,11 @@ function Control() {
 
   const handleToggle = async (id) => {
     const currentVal = String(values[id] || "");
-    if (currentVal.includes("AUTO")) return;
-
+    if (currentVal.includes("LOCK") || currentVal.includes("AUTO")) return;
     const isCurrentlyOn = currentVal.includes("_ON");
     const nextStatus = isCurrentlyOn ? "OFF" : "ON";
-    const prefix = currentVal.includes("LOCK") ? "LOCK" : "MAN";
-    const newValue = `${prefix}_${nextStatus}`;
-
+    const newValue = `MAN_${nextStatus}`;
     try {
-      // WRITE TO RTDB
       await update(ref(rtdb, "Controls"), { [id]: newValue });
     } catch (e) { console.error("Toggle failed", e); }
   };
@@ -83,21 +77,18 @@ function Control() {
   const handleModeToggle = async (e, id) => {
     e.stopPropagation(); 
     const currentVal = String(values[id] || "");
+    if (currentVal.includes("LOCK")) return;
     const isAuto = currentVal.includes("AUTO");
-    const isCurrentlyOn = currentVal.includes("_ON");
-    const status = isCurrentlyOn ? "ON" : "OFF";
-    
+    const status = currentVal.includes("_ON") ? "ON" : "OFF";
     const nextMode = isAuto ? "MAN" : "AUTO";
     const newValue = `${nextMode}_${status}`;
-  
     try {
       const payload = { [id]: newValue };
       if (isAuto) { 
           payload[`${id}_Limit`] = selectedTimeouts[id];
       } else {
-          payload[`${id}_ExpirationTime`] = null; // RTDB deletes on null
+          payload[`${id}_ExpirationTime`] = null; 
       }
-      // WRITE TO RTDB
       await update(ref(rtdb, "Controls"), payload);
     } catch (e) { console.error("Mode switch failed", e); }
   };
@@ -106,27 +97,25 @@ function Control() {
     e.stopPropagation();
     const currentVal = String(values[id] || "");
     const status = currentVal.includes("_ON") ? "ON" : "OFF";
-    const newValue = currentVal.includes("LOCK") ? `AUTO_${status}` : `LOCK_${status}`;
-
+    const newValue = currentVal.includes("LOCK") ? `MAN_${status}` : `LOCK_${status}`;
     try {
-      // WRITE TO RTDB
       await update(ref(rtdb, "Controls"), { [id]: newValue });
     } catch (e) { console.error("Lock toggle failed", e); }
   };
 
   const handleColorChange = async (color) => {
     try {
-      // WRITE TO RTDB
       await update(ref(rtdb, "Controls"), { color: color.toUpperCase() });
     } catch (e) { console.error("Color change failed", e); }
   };
 
-  const getDeviceIcon = (id, isOn) => {
+  const getDeviceIcon = (id, isOn, isLocked) => {
+    const animationClass = (isOn && !isLocked) ? (id === "FanDecision" ? "icon-spin" : "icon-pulse") : "";
     switch (id) {
-      case "FanDecision": return <span className={`device-icon ${isOn ? "icon-spin" : ""}`}>🌀</span>;
-      case "WaterDecision": return <span className={`device-icon ${isOn ? "icon-pulse" : ""}`}>💧</span>;
-      case "LEDDecision": return <span className={`device-icon ${isOn ? "icon-pulse" : ""}`}>💡</span>;
-      case "FertDecision": return <span className={`device-icon ${isOn ? "icon-pulse" : ""}`}>🧪</span>;
+      case "FanDecision": return <span className={`device-icon ${animationClass}`}>🌀</span>;
+      case "WaterDecision": return <span className={`device-icon ${animationClass}`}>💧</span>;
+      case "LEDDecision": return <span className={`device-icon ${animationClass}`}>💡</span>;
+      case "FertDecision": return <span className={`device-icon ${animationClass}`}>🧪</span>;
       default: return <span className="device-icon">⚙️</span>;
     }
   };
@@ -177,36 +166,55 @@ function Control() {
             const isManual = valStr.includes("MAN");
 
             return (
-              <div key={i} className={`control-card ${isOn ? "on" : "off"} ${isAuto ? "is-auto" : ""} ${isLocked ? "locked-state" : ""}`}>
-                <button className="thin-lock-btn" onClick={(e) => handleLockToggle(e, sw.id)}>
-                  {isLocked ? "🔓 UNLOCK" : "🔒 LOCK"}
-                </button>
+              <div 
+                key={i} 
+                className={`control-card ${isOn ? "state-active" : "state-idle"} ${isAuto ? "is-auto" : ""} ${isLocked ? "locked-state" : ""}`}
+              >
+                {!isAuto && (
+                  <button className="thin-lock-btn" onClick={(e) => handleLockToggle(e, sw.id)}>
+                    {isLocked ? "🔓 UNLOCK" : "🔒 LOCK"}
+                  </button>
+                )}
 
-                <div className="card-main-area" onClick={() => handleToggle(sw.id)}>
+                <div 
+                  className={`card-main-area ${isLocked ? "locked-ui" : ""}`} 
+                  onClick={() => handleToggle(sw.id)}
+                >
                   <div className="mode-indicator">{isLocked ? "🚫 LOCKED" : isManual ? "👤 MANUAL" : "🤖 AI AUTO"}</div>
-                  {getDeviceIcon(sw.id, isOn)}
+                  
+                  {getDeviceIcon(sw.id, isOn, isLocked)}
+                  
                   <h2>{sw.label}</h2>
-                  <div className="status-badge">{isAuto ? "AI MANAGED" : (isOn ? "ACTIVE" : "IDLE")}</div>
-                  {isManual && values[`${sw.id}_ExpirationTime`] && (
+                  
+                  <div className={`status-badge-new ${isOn ? "badge-on" : "badge-off"}`}>
+                    <span className="indicator-dot"></span>
+                    {isLocked ? "LOCKED" : (isOn ? "ACTIVE" : "IDLE")}
+                  </div>
+
+                  {isManual && !isLocked && values[`${sw.id}_ExpirationTime`] && (
                     <div className="expiration-timer">
-                      AI TAKEOVER IN: <ExpiryTimer expirationTime={values[`${sw.id}_ExpirationTime`]} />
+                      AI TAKEOVER: <ExpiryTimer expirationTime={values[`${sw.id}_ExpirationTime`]} />
                     </div>
                   )}
                 </div>
 
-                <div className="timeout-selector-area">
-                  <label>AUTO-REVERT AFTER:</label>
+                <div className={`timeout-selector-area ${isLocked ? "disabled-ui" : ""}`}>
+                  <label>AUTO-REVERT:</label>
                   <select 
                     value={selectedTimeouts[sw.id]} 
-                    disabled={isManual} 
+                    disabled={isManual || isLocked} 
                     onChange={(e) => setSelectedTimeouts({...selectedTimeouts, [sw.id]: Number(e.target.value)})}
                   >
                     {timeoutOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
                   </select>
                 </div>
                 
-                <button className={`mode-toggle-btn ${!isAuto ? "btn-to-auto" : "btn-to-man"}`} onClick={(e) => handleModeToggle(e, sw.id)}>
-                  {!isAuto ? "RELEASE TO AI" : "TAKE MANUAL CONTROL"}
+                <button 
+                  className={`mode-toggle-btn ${!isAuto ? "btn-to-auto" : "btn-to-man"}`} 
+                  disabled={isLocked}
+                  onClick={(e) => handleModeToggle(e, sw.id)}
+                >
+                  {isLocked ? "LOCKED" : (!isAuto ? "RELEASE TO AI" : "TAKE MANUAL")}
                 </button>
               </div>
             );

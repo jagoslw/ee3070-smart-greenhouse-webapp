@@ -1,25 +1,33 @@
-/* --- AGiVEMS Sensor Dashboard (Scaled 1.25x) --- */
+/* --- AGiVEMS Modernized Sensor Dashboard (Scaled 1.25x) --- */
 :root {
   --neon-green: #00ff88;
   --neon-red: #ff3b3b;
   --neon-blue: #60a5fa;
+  --neon-purple: #a855f7;
   --glass-bg: rgba(255, 255, 255, 0.05);
   --glass-border: rgba(255, 255, 255, 0.1);
   --text-main: #e0e0e0;
+  /* Preserving your original deep gradient style */
+  --bg-gradient: radial-gradient(circle at top right, #1e293b, #0f172a, #020617);
 }
 
-.sensor-page-container {
+.sensor-page-modern {
   animation: fadeIn 0.8s ease-out;
-  padding: 50px 25px; /* Scaled padding */
+  padding: 50px 25px;
+  min-height: 100vh;
+  color: var(--text-main);
 }
 
-.sensor-header {
+/* --- Header Section --- */
+.sensor-header-v2 {
   text-align: center;
-  margin-bottom: 40px; /* Scaled from 30px */
+  margin-bottom: 50px;
+  border-bottom: 1px solid var(--glass-border);
+  padding-bottom: 30px;
 }
 
-.sensor-legend {
-  font-size: 3.125rem; /* Scaled from 2.5rem */
+.sensor-title-main {
+  font-size: 3.125rem; /* 1.25x Scale */
   font-weight: 800;
   background: linear-gradient(to right, var(--neon-green), var(--neon-blue));
   -webkit-background-clip: text;
@@ -27,46 +35,81 @@
   margin-bottom: 10px;
 }
 
-.system-heartbeat {
+.pulse-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
   font-family: 'JetBrains Mono', monospace;
-  font-size: 0.875rem; /* Scaled from 0.7rem */
-  color: #666;
+  font-size: 0.875rem;
+  color: #888;
   letter-spacing: 2.5px;
+}
+
+.pulse-dot {
+  height: 10px;
+  width: 10px;
+  background-color: var(--neon-green);
+  border-radius: 50%;
+  box-shadow: 0 0 10px var(--neon-green);
+  animation: pulse-glow 2s infinite;
+}
+
+/* --- Grouped Sections --- */
+.sensor-section {
+  max-width: 1500px;
+  margin: 0 auto 60px auto;
+}
+
+.section-title {
+  font-size: 1.25rem;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  margin-bottom: 25px;
+  color: #94a3b8;
+  border-left: 5px solid var(--neon-green);
+  padding-left: 20px;
+  background: linear-gradient(90deg, rgba(0, 255, 136, 0.1), transparent);
+}
+
+/* YOLO Section Accent */
+.sensor-section:last-of-type .section-title {
+  border-left-color: var(--neon-purple);
+  background: linear-gradient(90deg, rgba(168, 85, 247, 0.1), transparent);
 }
 
 /* --- 3x3 Grid Layout --- */
 .sensor-grid {
   display: grid;
-  /* Forces 3 columns on desktop/tablets */
   grid-template-columns: repeat(3, 1fr); 
-  gap: 25px; /* Scaled from 20px */
-  max-width: 1500px; /* Scaled from 1200px */
-  margin: 0 auto;
+  gap: 25px;
 }
 
-/* Individual Cards */
+/* --- Individual Sensor Cards --- */
 .sensor-card {
   background: var(--glass-bg);
   backdrop-filter: blur(18px);
   border: 1px solid var(--glass-border);
-  border-radius: 20px; /* Scaled from 15px */
-  padding: 32px; /* Scaled from 25px */
+  border-radius: 20px;
+  padding: 32px;
   position: relative;
   overflow: hidden;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
   align-items: center;
+  text-align: center;
 }
 
 .sensor-card:hover {
   border-color: rgba(0, 255, 136, 0.4);
   transform: translateY(-7px);
   box-shadow: 0 12px 35px rgba(0, 255, 136, 0.15);
+  background: rgba(255, 255, 255, 0.08);
 }
 
-.sensor-title {
-  font-size: 0.875rem; /* Scaled from 0.7rem */
+.sensor-label {
+  font-size: 0.875rem;
   color: #888;
   text-transform: uppercase;
   letter-spacing: 2.5px;
@@ -74,64 +117,61 @@
 }
 
 .sensor-value {
-  font-size: 3.125rem; /* Scaled from 2.5rem */
+  font-size: 3.125rem;
   font-weight: 800;
   color: var(--text-main);
   margin-bottom: 12px;
-  transition: all 0.3s ease;
-}
-
-/* Update Pulse Effect */
-.glow-pulse {
-  color: var(--neon-green) !important;
-  text-shadow: 0 0 25px var(--neon-green);
 }
 
 .sensor-status {
-  font-size: 0.875rem; /* Scaled from 0.7rem */
+  font-size: 0.875rem;
   font-weight: 600;
-  padding: 5px 15px; /* Scaled */
-  border-radius: 5px;
+  padding: 6px 18px;
+  border-radius: 8px;
   text-transform: uppercase;
 }
 
+/* Status Tones */
 .status-good { color: var(--neon-green); background: rgba(0, 255, 136, 0.05); }
 .status-bad { color: var(--neon-red); background: rgba(255, 59, 59, 0.05); animation: blink 1s infinite; }
-.status-neutral { color: #888; background: rgba(255, 255, 255, 0.05); }
+.status-neutral { color: var(--neon-blue); background: rgba(96, 165, 250, 0.05); }
 
-/* Bottom Progress Bar */
+/* --- Bottom Progress Bar --- */
 .sensor-progress-bg {
   position: absolute;
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 5px; /* Scaled from 4px */
-  background: rgba(255,255,255,0.05);
+  height: 5px;
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .sensor-progress-fill {
   height: 100%;
-  transition: width 1s ease-in-out, background 0.5s ease;
+  transition: width 1s ease-in-out;
+  background: var(--neon-green);
+}
+
+/* --- Animations --- */
+@keyframes pulse-glow {
+  0% { transform: scale(0.95); opacity: 0.7; }
+  70% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(0.95); opacity: 0.7; }
 }
 
 @keyframes blink { 50% { opacity: 0.5; } }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
-/* --- Responsive Adjustments --- */
-@media screen and (max-width: 1024px) {
-  .sensor-grid {
-    grid-template-columns: repeat(2, 1fr); /* 2x2 for medium tablets */
-  }
+@keyframes fadeIn { 
+  from { opacity: 0; transform: translateY(20px); } 
+  to { opacity: 1; transform: translateY(0); } 
 }
 
-@media screen and (max-width: 600px) {
-  .sensor-grid {
-    grid-template-columns: 1fr; /* Single column for mobile */
-  }
-  .sensor-legend {
-    font-size: 2.2rem;
-  }
-  .sensor-value {
-    font-size: 2.5rem;
-  }
+/* --- Responsive Layouts --- */
+@media screen and (max-width: 1200px) {
+  .sensor-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media screen and (max-width: 768px) {
+  .sensor-grid { grid-template-columns: 1fr; }
+  .sensor-title-main { font-size: 2.2rem; }
+  .sensor-value { font-size: 2.5rem; }
 }

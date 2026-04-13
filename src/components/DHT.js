@@ -1,40 +1,62 @@
 import React from "react";
 import SensorCard from "./SensorCard";
 import { useSensors } from "./useDHTSensors";
+import { useYoloSensors } from "./useYOLOSensors"; // New Hook
 import { sensorDefinitions } from "./DHTSensorsConfig";
+import { yoloDefinitions } from "./YOLOSensorsConfig";
 
 function DHT() {
-  const DHTData = useSensors();
+  const dhtData = useSensors();
+  const yoloData = useYoloSensors();
 
-  // Separate meta-data (timestamp) from actual sensor levels// Inside DHT.js - Change how the timestamp is handled
-  const timestamp = DHTData.Timestamp 
-    ? (typeof DHTData.Timestamp.toDate === "function" 
-        ? DHTData.Timestamp.toDate().toLocaleString() 
-        : new Date(DHTData.Timestamp).toLocaleString())
-    : "CONNECTING TO SENSOR...";
-  // Filter out non-gauge items (Timestamp and Fahrenheit) to keep grid clean
-  const displaySensors = sensorDefinitions.filter(
-    def => def.key !== "Timestamp"
-  );
+  const timestamp = dhtData.Timestamp 
+    ? (dhtData.Timestamp.toDate?.() || new Date(dhtData.Timestamp)).toLocaleString() 
+    : "SYNCING...";
+
+  // Group definitions by their 'group' property
+  const groups = ["Vital", "Nutrients", "Resources", "YOLO Detection"];
 
   return (
-    <div className="sensor-page-container">
-      <header className="sensor-header">
-        <h3 className="sensor-legend">AGiVEMS Environmental Levels</h3>
-        <p className="system-heartbeat">LAST SYNC: {timestamp}</p>
+    <div className="sensor-page-modern">
+      <header className="sensor-header-v2">
+        <div className="header-content">
+          <h1>AGiVEMS <span className="highlight">Intelligence</span></h1>
+          <div className="pulse-container">
+            <span className="pulse-dot"></span>
+            <p>Live Telemetry: {timestamp}</p>
+          </div>
+        </div>
       </header>
 
-      <section className="sensor-grid">
-        {displaySensors.map((def, i) => (
-          <SensorCard
-            key={i}
-            sensorName={def.label}
-            value={def.format(DHTData)}
-            unit={def.unit}
-            statusFn={def.status}
-          />
-        ))}
-      </section>
+      {groups.map(groupName => (
+        <div key={groupName} className="sensor-section">
+          <h2 className="section-title">{groupName}</h2>
+          <div className="sensor-grid">
+            {sensorDefinitions
+              .filter(def => def.group === groupName)
+              .map((def, i) => (
+                <SensorCard
+                  key={i}
+                  sensorName={def.label}
+                  value={def.format(dhtData)}
+                  unit={def.unit}
+                  statusFn={def.status}
+                />
+              ))}
+            {yoloDefinitions
+              .filter(def => def.group === groupName)
+              .map((def, i) => (
+                <SensorCard
+                  key={i}
+                  sensorName={def.label}
+                  value={def.format(yoloData)}
+                  unit={def.unit}
+                  statusFn={def.status}
+                />
+              ))}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }

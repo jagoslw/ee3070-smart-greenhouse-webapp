@@ -83,7 +83,7 @@ body.global-offline-bg { background: radial-gradient(circle at top right, #3d0a0
   background: rgba(255, 255, 255, 0.03); border: none;
   border-bottom: 1px solid var(--glass-border); color: rgba(255, 255, 255, 0.4);
   font-size: 0.8rem; padding: 12px 0; width: 100%; cursor: pointer; transition: 0.3s;
-  letter-spacing: 1.5px;
+  letter-spacing: 1.5px; font-family: inherit;
 }
 .thin-lock-btn:hover { background: rgba(255, 255, 255, 0.1); color: #fff; }
 
@@ -164,4 +164,69 @@ body.global-offline-bg { background: radial-gradient(circle at top right, #3d0a0
   .status-item { width: 45%; justify-content: center; font-size: 0.9rem; }
   .control-grid-four { grid-template-columns: 1fr; }
   .color-btn { width: 45px; height: 45px; }
+}
+/* Card States */
+.state-active {
+  background: rgba(20, 40, 30, 0.85) !important;
+  border: 1px solid #00ff88 !important;
+  box-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
+  filter: saturate(1.2);
+  opacity: 1;
+}
+
+.state-idle {
+  background: rgba(30, 30, 35, 0.6) !important;
+  border: 1px solid #444 !important;
+  opacity: 0.7;
+  filter: saturate(0.5);
+}
+
+.state-idle:hover {
+  opacity: 0.9;
+  filter: saturate(0.8);
+}
+
+/* New Status Badge */
+.status-badge-new {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  margin-top: 10px;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.badge-on {
+  color: #00ff88;
+  border: 1px solid rgba(0, 255, 136, 0.3);
+}
+
+.badge-off {
+  color: #888;
+  border: 1px solid #444;
+}
+
+/* Indicator Dot */
+.indicator-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #444;
+}
+
+.badge-on .indicator-dot {
+  background: #00ff88;
+  box-shadow: 0 0 8px #00ff88;
+  animation: blink 2s infinite;
+}
+
+@keyframes blink {
+  0% { opacity: 1; }
+  50% { opacity: 0.4; }
+  100% { opacity: 1; }
 }

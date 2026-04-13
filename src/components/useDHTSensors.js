@@ -9,7 +9,6 @@ export function useSensors() {
     // Optimization: Using onSnapshot instead of a manual setInterval
     // This is "cheaper" on Firebase reads and updates instantly when the sensor writes
     const docRef = doc(db, "Environment", "0000000");
-
     const unsubscribe = onSnapshot(docRef, (snap) => {
       if (snap.exists()) {
         setData(snap.data());

@@ -17,14 +17,28 @@ function Reports() {
   const [recordLimit, setRecordLimit] = useState(50); // Default to 50
 
   useEffect(() => {
-    // Dynamic query based on recordLimit state
     const q = query(collection(db, "Environment"), orderBy("Timestamp", "desc"), limit(recordLimit));
+    
     const unsubscribe = onSnapshot(q, (snap) => {
-      const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const data = snap.docs
+        .map(doc => ({ id: doc.id, ...doc.data() }))
+        .filter(r => {
+          // --- INVALID STATS FILTER ---
+          // Returns false if all major telemetric values are 0
+          return !(
+            r.Temperature_C === 0 && 
+            r.Humidity === 0 && 
+            r.Moisture === 0 && 
+            r.Nitrogen === 0 && 
+            r.Phosphorous === 0 && 
+            r.Potassium === 0
+          );
+        });
+
       if (data.length > 0) setLatest(data[0]);
-      // Reverse to show chronological order in charts (left to right)
       setReadings([...data].reverse());
     });
+
     return () => unsubscribe();
   }, [recordLimit]);
 

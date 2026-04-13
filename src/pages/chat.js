@@ -8,9 +8,9 @@ import {
   limitToLast, 
   onSnapshot, 
   serverTimestamp,
-  getDocs,       // Added for fetching all docs to delete
-  writeBatch,    // Added for efficient deletion
-  doc            // Added for referencing docs
+  getDocs,
+  writeBatch,
+  doc
 } from "firebase/firestore";
 import "./chat.css";
 
@@ -20,7 +20,13 @@ function Chat() {
   const [isTyping, setIsTyping] = useState(false);
   const scrollRef = useRef(null);
 
-  // 1. Listen for Chat History
+  // Request notification permission on mount
+  useEffect(() => {
+    if ("Notification" in window && Notification.permission !== "granted") {
+      Notification.requestPermission();
+    }
+  }, []);
+
   useEffect(() => {
     const q = query(
       collection(db, "Chat"), 
@@ -33,10 +39,21 @@ function Chat() {
         id: doc.id,
         ...doc.data()
       }));
+
+      // --- ALARM DETECTION & NOTIFICATION ---
+      const latestMsg = msgs[msgs.length - 1];
+      if (latestMsg && latestMsg.isAlarm && latestMsg.role === "ai") {
+        if (Notification.permission === "granted") {
+          new Notification("Greenhouse Alarm!", {
+            body: latestMsg.text,
+            icon: "/alarm-icon.png" // Optional: add an icon path
+          });
+        }
+      }
+
       setMessages(msgs);
       
-      const lastMsg = msgs[msgs.length - 1];
-      if (lastMsg && lastMsg.role === "user" && !lastMsg.replied) {
+      if (latestMsg && latestMsg.role === "user" && !latestMsg.replied) {
         setIsTyping(true);
       } else {
         setIsTyping(false);
@@ -50,21 +67,16 @@ function Chat() {
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping]);
 
-  // 2. Clear History Function
   const clearHistory = async () => {
     if (!window.confirm("Are you sure you want to delete all chat history?")) return;
-
     try {
       const chatRef = collection(db, "Chat");
       const snapshot = await getDocs(chatRef);
       const batch = writeBatch(db);
-
       snapshot.docs.forEach((document) => {
         batch.delete(doc(db, "Chat", document.id));
       });
-
       await batch.commit();
-      console.log("Chat history cleared!");
     } catch (err) {
       console.error("Error clearing history:", err);
     }
@@ -73,10 +85,8 @@ function Chat() {
   const sendMessage = async (e) => {
     e.preventDefault();
     if (!input.trim()) return;
-
     const userMsg = input;
     setInput("");
-
     try {
       await addDoc(collection(db, "Chat"), {
         role: "user",
@@ -98,16 +108,14 @@ function Chat() {
             <span className="dot"></span> Local AI Online
           </div>
         </div>
-        {/* NEW: Clear History Button */}
-        <button className="clear-chat-btn" onClick={clearHistory}>
-          🗑️ Clear
-        </button>
+        <button className="clear-chat-btn" onClick={clearHistory}>🗑️ Clear</button>
       </div>
 
       <div className="chat-window">
         {messages.map((msg) => (
           <div key={msg.id} className={`message-wrapper ${msg.role}`}>
-            <div className="message-bubble">
+            {/* Added conditional 'alarm-highlight' class */}
+            <div className={`message-bubble ${msg.isAlarm ? 'alarm-highlight' : ''}`}>
               {msg.text && <div className="text-content">{msg.text}</div>}
               {msg.image && (
                 <div className="image-content">
@@ -115,7 +123,7 @@ function Chat() {
                     alt="Greenhouse Visual" 
                     className="chat-embedded-img" 
                     src={msg.image.startsWith('data:image') ? msg.image : `data:image/jpeg;base64,${msg.image}`} 
-                    />
+                  />
                 </div>
               )}
               <span className="message-time">
